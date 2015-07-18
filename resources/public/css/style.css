@@ -1,0 +1,20 @@
+/* some style */
+
+div.last-event > pre{
+    padding: 20px;
+    border: 1px solid;
+    height: 180px;
+    overflow: scroll;
+}
+
+ul{
+    padding-left: 0px;
+}
+
+li{
+    height: 20px;
+    overflow: hidden;
+        border: 1px solid;
+}
+
+ 
