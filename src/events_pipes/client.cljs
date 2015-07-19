@@ -31,10 +31,16 @@
                           :role-colors {}
                           :events []}))
  
-(defn selected-event [ev]
-  (when ev
-    [:div.last-event
-     [:pre [:code {:class "clojure"} (with-out-str (-> ev second pprint))]]]))
+(def selected-event
+  (with-meta
+    (fn [ev]
+      (when ev [:code {:class "clojure"} (with-out-str (-> ev second pprint))]))
+     {:component-did-update
+                     (fn [this old-props old-childs]
+                       (.highlightBlock js/hljs (reagent/dom-node this)))})) 
+
+#_(def selected-ev (with-meta selected-event
+                                ))
 
 (defn select-event [idx]
   (swap! app-state assoc :selected idx))
@@ -42,11 +48,13 @@
 (defn ui []
   [:div
    [:h1 "Events"]
-   [selected-event (get (:events @app-state) (:selected @app-state))]
+   [:div.last-event
+    [:pre
+     [selected-event (get (:events @app-state) (:selected @app-state))]]]
    [:ul (map-indexed
          (fn [idx [color content]]
            [:li {:key idx
-                 :style {:color color}
+                 :style {:background-color color}
                  :on-click #(select-event idx)} (str content)]) 
          (:events @app-state))]]) 
 
@@ -59,13 +67,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
 (defn add-colored-event [state {:keys [event-id role content]}]
-  (let [colors #{"red" "blue" "green"}
+  (let [colors #{"#028482" "#7ABA7A" "#B76EB8" "#6BCAE2" "#51A5BA" "#41924B" "#AFEAAA" "#87E293" "#FE8402"}
         role-colors (:role-colors state)
         color (or (get role-colors role)
                   (first (set/difference colors (into #{} (vals role-colors))))
                   "black")]
     (-> state
-        (update-in [:events] conj [color content ])
+        (update-in [:events] conj [color content ]) 
         (assoc-in [:role-colors role]  color))))
 
 (defn event-msg-handler* [{:keys [id ?data event]}]
