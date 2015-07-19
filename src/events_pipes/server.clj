@@ -7,6 +7,7 @@
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
+            [clojure.core.async :refer [chan sliding-buffer go go-loop <! >! <!! >!! mix toggle]]
             [org.httpkit.server :as http-server]))
 
 
@@ -20,16 +21,26 @@
   (def connected-uids                connected-uids) ; Watchable, read-only atom
   )
 
+;; Events commint from outside the system arrives here
+(def input-channel (chan (sliding-buffer 100)))
+
+;; Every event put here will end up in the browser
+(def output-channel (chan (sliding-buffer 100)))
+
+;; This is the output-channel mixer
+;; add with toggle to the mix channels you want in the output
+(def output-mix (mix output-channel))
 
 
-(defroutes api-routes
-  (POST "/event" req (let [event-id (str (java.util.UUID/randomUUID))]
-                       (chsk-send! :sente/all-users-without-uid [:general/reporting (assoc (-> req keywordize-keys :body)
-                                                                                           :event-id event-id)] )
+(defn post-event [recived-event]
+  (let [event-id (str (java.util.UUID/randomUUID))]
+                       (>!! input-channel [:general/reporting (assoc recived-event :event-id event-id)]) 
                        {:status 200
                         :body {:success true
                                :event-id event-id}}))
-  )
+
+(defroutes api-routes
+  (POST "/event" req (post-event (-> req keywordize-keys :body))))
 
 (defroutes sente-routes
   (GET  "/chsk" req (ring-ajax-get-or-ws-handshake req))
@@ -45,5 +56,9 @@
       (wrap-json-response))))
 
 
-(defn start-server []
-  (http-server/run-server #'my-app {:port 7777 :join? false}))
+(defn start []
+  (http-server/run-server #'my-app {:port 7777 :join? false})
+  
+  (go-loop []
+    (chsk-send! :sente/all-users-without-uid (<! output-channel))
+    (recur)))

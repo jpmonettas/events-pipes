@@ -11,26 +11,54 @@
  
 (enable-console-print!)
 
-(let [{:keys [chsk ch-recv send-fn state]}
-      (sente/make-channel-socket! "/chsk" ; Note the same path as before
-                                  {:type :ws ; e/o #{:auto :ajax :ws}
-                                   :chsk-url-fn (constantly "ws://localhost:7777/chsk")
-       })]
-  (def chsk       chsk)
-  (def ch-chsk    ch-recv) ; ChannelSocket's receive channel
-  (def chsk-send! send-fn) ; ChannelSocket's send API fn
-  (def chsk-state state)   ; Watchable, read-only atom
-  )
 
+(defonce app-state (atom {:state (atom nil)
+                          :chsk nil
+                          :selected 0
+                          :role-colors {}
+                          :events []}))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Incomming channel messages router ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defonce router_ (atom nil))
+
+(declare event-msg-handler*)
+
+(defn  stop-router! [] 
+  (when-let [stop-f @router_] (stop-f)))
+
+(defn start-router! [ch] 
+  (stop-router!)
+  (reset! router_ (sente/start-chsk-router! ch event-msg-handler*)))
+ 
+(defn on-js-reload [])
 
 ;;;;;;;;
 ;; UI ;;
 ;;;;;;;;
 
-(defonce app-state (atom {:selected 0
-                          :role-colors {}
-                          :events []}))
- 
+
+
+;; User events handling
+;; --------------------
+(defn select-event [idx]
+  (swap! app-state assoc :selected idx))
+
+(defn connect [server]
+  (let [{:keys [chsk ch-recv send-fn state]}
+        (sente/make-channel-socket! "/chsk" ; Note the same path as before
+                                    {:type :ws ; e/o #{:auto :ajax :ws}
+                                     :chsk-url-fn (constantly (str "ws://" server "/chsk"))})]
+
+    (stop-router!)
+    (swap! app-state #(-> % (assoc :state state)))
+
+    (start-router! ch-recv)))
+
+;; Components
+;; ----------
 (def selected-event
   (with-meta
     (fn [ev]
@@ -39,15 +67,22 @@
                      (fn [this old-props old-childs]
                        (.highlightBlock js/hljs (reagent/dom-node this)))})) 
 
-#_(def selected-ev (with-meta selected-event
-                                ))
 
-(defn select-event [idx]
-  (swap! app-state assoc :selected idx))
+
+
+(defn connection [connected]
+  (let [server-address (atom nil)]
+    (fn [props]
+      [:div
+       [:label "Sever:"]
+       [:input {:type :text
+                :on-change #(reset! server-address (-> % .-target .-value))}]
+       [:button {:on-click #(connect @server-address)} "Connect"]
+       [:span (if (-> @app-state :state deref :open?) "Connected" "Not Connected")]])))
 
 (defn ui []
   [:div
-   [:h1 "Events"]
+   [connection]
    [:div.last-event
     [:pre
      [selected-event (get (:events @app-state) (:selected @app-state))]]]
@@ -84,20 +119,5 @@
  
  
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Incomming channel messages router ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defonce router_ (atom nil))
-
-(defn  stop-router! [] 
-  (when-let [stop-f @router_] (stop-f)))
-
-(defn start-router! [] 
-  (stop-router!)
-  (reset! router_ (sente/start-chsk-router! ch-chsk event-msg-handler*)))
- 
-(defn on-js-reload [])
-
-(start-router!)
  
