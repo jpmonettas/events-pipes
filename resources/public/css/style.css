@@ -7,14 +7,29 @@ div.last-event > pre{
     overflow: scroll;
 }
 
+span.ip, span.role{
+    border: 1px solid;
+    margin: 2px;
+    border-radius: 5px;
+}
 ul{
     padding-left: 0px;
 }
+div#events{
+    margin-top: 300px;
+}
+
+div#header{
+    background-color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
 
 li{
-    height: 20px;
+    height: 18px;
     overflow: hidden;
-    
 }
 
  

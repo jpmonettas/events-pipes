@@ -57,18 +57,22 @@
 
     (start-router! ch-recv)))
 
+(defn clear-events []
+  (swap! app-state merge {:selected 0 :role-colors {} :events []}))
+
+
 ;; Components
 ;; ----------
 (def selected-event
   (with-meta
     (fn [ev]
-      (when ev [:code {:class "clojure"} (with-out-str (-> ev second pprint))]))
+      (when ev [:code {:class "clojure"} (with-out-str (-> ev last pprint))]))
      {:component-did-update
                      (fn [this old-props old-childs]
                        (.highlightBlock js/hljs (reagent/dom-node this)))})) 
 
 
-
+ 
 
 (defn connection [connected]
   (let [server-address (atom nil)]
@@ -79,19 +83,24 @@
                 :on-change #(reset! server-address (-> % .-target .-value))}]
        [:button {:on-click #(connect @server-address)} "Connect"]
        [:span (if (-> @app-state :state deref :open?) "Connected" "Not Connected")]])))
-
+ 
 (defn ui []
   [:div
-   [connection]
-   [:div.last-event
-    [:pre
-     [selected-event (get (:events @app-state) (:selected @app-state))]]]
-   [:ul (map-indexed
-         (fn [idx [color content]]
-           [:li {:key idx
-                 :style {:background-color color}
-                 :on-click #(select-event idx)} (str content)]) 
-         (:events @app-state))]]) 
+   [:div#header
+    [connection]
+    [:div.last-event
+     [:pre
+      [selected-event (get (:events @app-state) (:selected @app-state))]]
+     [:button {:on-click #(clear-events)} "Clear"]]]
+   [:div#events
+    [:ul (map-indexed
+                 (fn [idx [remote-addr role color content]]
+                   [:li {:key idx
+                         :on-click #(select-event idx)}
+                    [:span.ip {:style {:background-color color}} remote-addr]
+                    [:span.role {:style {:background-color color}} role]
+                    [:span.content {:style {:background-color color}} (str content)]]) 
+                 (:events @app-state))]]]) 
 
 (reagent/render-component [ui]
                           (. js/document (getElementById "app"))) 
@@ -101,14 +110,14 @@
 ;; Incomming events handling  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
-(defn add-colored-event [state {:keys [event-id role content]}]
+(defn add-colored-event [state {:keys [event-id role remote-addr content]}]
   (let [colors #{"#028482" "#7ABA7A" "#B76EB8" "#6BCAE2" "#51A5BA" "#41924B" "#AFEAAA" "#87E293" "#FE8402"}
         role-colors (:role-colors state)
         color (or (get role-colors role)
                   (first (set/difference colors (into #{} (vals role-colors))))
                   "black")]
     (-> state
-        (update-in [:events] conj [color content ]) 
+        (update-in [:events] conj [remote-addr role color content]) 
         (assoc-in [:role-colors role]  color))))
 
 (defn event-msg-handler* [{:keys [id ?data event]}]

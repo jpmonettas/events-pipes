@@ -32,15 +32,17 @@
 (def output-mix (mix output-channel))
 
 
-(defn post-event [recived-event]
+(defn post-event [remote-addr recived-event]
   (let [event-id (str (java.util.UUID/randomUUID))]
-                       (>!! input-channel [:general/reporting (assoc recived-event :event-id event-id)]) 
+    (>!! input-channel [:general/reporting (-> recived-event
+                                              (assoc :event-id event-id)
+                                              (assoc :remote-addr remote-addr))]) 
                        {:status 200
                         :body {:success true
                                :event-id event-id}}))
 
 (defroutes api-routes
-  (POST "/event" req (post-event (-> req keywordize-keys :body))))
+  (POST "/event" req (post-event (:remote-addr req) (-> req keywordize-keys :body))))
 
 (defroutes sente-routes
   (GET  "/chsk" req (ring-ajax-get-or-ws-handshake req))
@@ -54,6 +56,7 @@
    (-> api-routes
       (wrap-json-body)
       (wrap-json-response))))
+
 
 
 (defn start []
