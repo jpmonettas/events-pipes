@@ -8,6 +8,7 @@
                  [org.clojure/clojurescript "0.0-3297"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [cljsjs/highlight "8.4-0"]
+                 [http-kit "2.1.18"]
                  [reagent "0.5.0"]
                  [com.taoensso/sente "1.5.0"]
                  [compojure "1.4.0"]
@@ -16,9 +17,11 @@
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]]
 
+  :main ^:skip-aot events-pipes.server
+  
   :source-paths ["src"]
 
-  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+  ;;:clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
     :builds [{:id "dev"
@@ -68,4 +71,5 @@
 
              ;; to configure a different figwheel logfile path
              ;; :server-logfile "tmp/logs/figwheel-logfile.log" 
-             })
+             }
+  :profiles {:uberjar {:aot :all}})

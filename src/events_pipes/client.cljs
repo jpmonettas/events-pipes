@@ -2,7 +2,7 @@
     (:require-macros
      [cljs.core.async.macros :as asyncm :refer (go go-loop)])
     (:require [reagent.core :as reagent :refer [atom]]
-              [cljs.core.async :as async :refer (<! >! put! chan)]
+              [cljs.core.async :as async :refer (<! >! put! chan timeout)]
               [taoensso.sente  :as sente :refer (cb-success?)]
               [clojure.set :as set]
               [cljsjs.highlight :as hl]
@@ -75,12 +75,13 @@
  
 
 (defn connection [connected]
-  (let [server-address (atom nil)]
+  (let [server-address (atom "localhost:7777")]
     (fn [props]
       [:div
        [:label "Sever:"]
        [:input {:type :text
-                :on-change #(reset! server-address (-> % .-target .-value))}]
+                :on-change #(reset! server-address (-> % .-target .-value))
+                :value @server-address}]
        [:button {:on-click #(connect @server-address)} "Connect"]
        [:span (if (-> @app-state :state deref :open?) "Connected" "Not Connected")]])))
  

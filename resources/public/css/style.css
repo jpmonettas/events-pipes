@@ -32,4 +32,6 @@ li{
     overflow: hidden;
 }
 
- 
+.hljs {
+    overflow-x: visible;
+}

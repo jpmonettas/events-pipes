@@ -7,8 +7,10 @@
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
+            [compojure.route :as cr]
             [clojure.core.async :refer [chan sliding-buffer go go-loop <! >! <!! >!! mix toggle]]
-            [org.httpkit.server :as http-server]))
+            [org.httpkit.server :as http-server])
+  (:gen-class))
 
 
 (let [{:keys [ch-recv send-fn ajax-post-fn ajax-get-or-ws-handshake-fn
@@ -55,7 +57,8 @@
       ring.middleware.params/wrap-params)
    (-> api-routes
       (wrap-json-body)
-      (wrap-json-response))))
+      (wrap-json-response))
+   (cr/resources "/")))
 
 
 
@@ -65,3 +68,15 @@
   (go-loop []
     (chsk-send! :sente/all-users-without-uid (<! output-channel))
     (recur)))
+
+(defn -main
+  [& args]
+  ;; Load system configuration using any environment method like
+  ;; java -jar kiosko.jar /home/config.clj
+  
+  (start)
+
+  (toggle output-mix {input-channel {:mute false
+                                     :solo false
+                                     :pause false}})
+  (println "Done! Point your browser to http://localhost:7777/index.html"))
