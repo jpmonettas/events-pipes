@@ -8,7 +8,7 @@
             [ring.middleware.params :refer [wrap-params]]
             [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
             [compojure.route :as cr]
-            [clojure.core.async :refer [chan sliding-buffer go go-loop <! >! <!! >!! mix toggle]]
+            [clojure.core.async :refer [chan sliding-buffer go go-loop <! >! <!! >!! mix toggle mult tap admix]]
             [org.httpkit.server :as http-server])
   (:gen-class))
 
@@ -32,6 +32,28 @@
 ;; This is the output-channel mixer
 ;; add with toggle to the mix channels you want in the output
 (def output-mix (mix output-channel))
+
+(def channels (atom {"0" (let [ch-mult (mult input-channel)]
+                           {:mix-channel (tap ch-mult (chan (sliding-buffer 10)))
+                            :mult ch-mult
+                            :desc "Root Input"})}))
+
+
+(defn mute-mix [id on?]
+  (toggle output-mix {(get-in @channels [id :channel]) {:mute on?}}))
+
+(defn add-channel [ch from-id desc]
+  (let [new-id (str (java.util.UUID/randomUUID))
+        from-mult (get-in @channels [from-id :mult])
+        ch-mult (mult ch)
+        mix-ch (chan (sliding-buffer 100))]
+    (swap! channels assoc new-id {:mix-channel mix-ch
+                                  :mult ch-mult
+                                  :desc desc})
+    (tap from-mult ch)
+    (tap ch-mult mix-ch)
+    (admix output-mix mix-ch)
+    new-id))
 
 
 (defn post-event [remote-addr recived-event]
@@ -63,11 +85,19 @@
 
 
 (defn start []
-  (http-server/run-server #'my-app {:port 7777 :join? false})
+  (admix output-mix (get-in @channels ["0" :mix-channel]))
   
+  (http-server/run-server #'my-app {:port 7777 :join? false})
+
   (go-loop []
     (chsk-send! :sente/all-users-without-uid (<! output-channel))
-    (recur)))
+    (recur))
+
+  ;; Setup hardcoded channels
+  (add-channel (chan (sliding-buffer 100)
+                     (filter (fn [[_ {:keys [role]}]] (= role "error"))))
+               "0"
+               "Only errors"))
 
 (defn -main
   [& args]
@@ -75,8 +105,5 @@
   ;; java -jar kiosko.jar /home/config.clj
   
   (start)
-
-  (toggle output-mix {input-channel {:mute false
-                                     :solo false
-                                     :pause false}})
+  
   (println "Done! Point your browser to http://localhost:7777/index.html"))
