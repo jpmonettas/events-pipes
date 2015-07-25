@@ -1,12 +1,25 @@
 /* some style */
 
-div.last-event > pre{
+
+div.last-event {
     padding: 20px;
-    border: 1px solid;
-    height: 180px;
-    overflow: scroll;
+    position: absolute;
+    width: 80%;
+    left: 10%;
+    height: 400px;
+    
 }
 
+div.last-event>a{
+    margin-left:45%;
+}
+
+div.taps{
+    padding: 5px;
+}
+div.taps > button{
+    margin-right:5px;
+}
 span.ip, span.role{
     border: 1px solid;
     margin: 2px;
@@ -16,15 +29,12 @@ ul{
     padding-left: 0px;
 }
 div#events{
-    margin-top: 300px;
+    margin-top: 0px;
+    height: 100px;
 }
 
 div#header{
     background-color: white;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
 }
 
 li{
@@ -34,4 +44,4 @@ li{
 
 .hljs {
     overflow-x: visible;
-}
+} 

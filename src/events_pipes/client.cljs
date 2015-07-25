@@ -12,13 +12,15 @@
 (enable-console-print!)
 
 
-(defonce app-state (atom {:state (atom nil)
+(defonce app-state (atom {:state nil
+                          :taps []
+                          :modal-open? false
                           :chsk nil
                           :selected 0
                           :role-colors {}
                           :events []}))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 ;; Incomming channel messages router ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -44,7 +46,16 @@
 ;; User events handling
 ;; --------------------
 (defn select-event [idx]
-  (swap! app-state assoc :selected idx))
+  (swap! app-state (fn [s] (-> s
+                               (assoc :selected idx)
+                               (assoc :modal-open? true)))))
+
+(defn close-modal []
+  (swap! app-state assoc :modal-open? false))
+
+(defn toggle-tap [tap-id]
+  (let [chsk-send! (:send-fn @app-state)]
+    (chsk-send! [:taps/tap-toggled tap-id])))
 
 (defn connect [server]
   (let [{:keys [chsk ch-recv send-fn state]}
@@ -53,12 +64,19 @@
                                      :chsk-url-fn (constantly (str "ws://" server "/chsk"))})]
 
     (stop-router!)
-    (swap! app-state #(-> % (assoc :state state)))
+    (swap! app-state #(-> %
+                          (assoc :state state)
+                          (assoc :send-fn send-fn)))
 
-    (start-router! ch-recv)))
+    (start-router! ch-recv)
 
+    ;; Wait some time for the channels to connect, then ask for a refresh
+    (go (<! (timeout 2000))
+        (send-fn [:taps/please-refresh]))))
+ 
 (defn clear-events []
-  (swap! app-state merge {:selected 0 :role-colors {} :events []}))
+  (swap! app-state merge {:selected 0 :role-colors {} :events []})) 
+
 
 
 ;; Components
@@ -67,32 +85,42 @@
   (with-meta
     (fn [ev]
       (when ev [:code {:class "clojure"} (with-out-str (-> ev last pprint))]))
-     {:component-did-update
+    {:component-did-mount
                      (fn [this old-props old-childs]
                        (.highlightBlock js/hljs (reagent/dom-node this)))})) 
 
 
  
-
+ 
 (defn connection [connected]
   (let [server-address (atom "localhost:7777")]
     (fn [props]
-      [:div
+      [:div 
        [:label "Sever:"]
        [:input {:type :text
                 :on-change #(reset! server-address (-> % .-target .-value))
                 :value @server-address}]
        [:button {:on-click #(connect @server-address)} "Connect"]
-       [:span (if (-> @app-state :state deref :open?) "Connected" "Not Connected")]])))
- 
+       [:button {:on-click #(clear-events)} "Clear"]])))
+
+(defn taps [ts]
+  [:div.taps
+   (for [t ts]
+     (if (:muted? t)
+       [:button.btn.btn-danger {:key (:id t) :on-click #(toggle-tap (:id t))}
+        (:id t)]
+       [:button.btn.btn-success {:key (:id t) :on-click #(toggle-tap (:id t))}
+        (:id t)]))])
+
 (defn ui []
-  [:div
+  [:div 
    [:div#header
     [connection]
-    [:div.last-event
-     [:pre
-      [selected-event (get (:events @app-state) (:selected @app-state))]]
-     [:button {:on-click #(clear-events)} "Clear"]]]
+    (when (:modal-open? @app-state)
+      [:div.last-event
+       [:pre.code {:on-click #(when (:modal-open? @app-state) (close-modal))}
+        [selected-event (get (:events @app-state) (:selected @app-state))]]])]
+   [taps (:taps @app-state)]
    [:div#events
     [:ul (map-indexed
                  (fn [idx [remote-addr role color content]]
@@ -121,11 +149,26 @@
         (update-in [:events] conj [remote-addr role color content]) 
         (assoc-in [:role-colors role]  color))))
 
+(defmulti event-msg-handler (fn [[ev-type ev-data]] ev-type))
+
+(defmethod event-msg-handler :general/reporting
+  [[_ ev-data]]
+  (swap! app-state add-colored-event ev-data))
+
+(defmethod event-msg-handler :taps/refreshed
+  [[_ new-taps]]
+  (swap! app-state assoc :taps new-taps))
+
+(defmethod event-msg-handler :default
+  [e]
+  (println "Don't know how to handle " e))
+
+
 (defn event-msg-handler* [{:keys [id ?data event]}]
   (println "EVENT! " event)
   (when (= id :chsk/recv)
-    (let [[ev-type ev-data] (second event)]
-      (swap! app-state add-colored-event ev-data))))
+    (event-msg-handler (second event))
+    (let [[ev-type ev-data] (second event)])))
  
  
 
