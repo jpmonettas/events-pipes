@@ -3,8 +3,8 @@
 *** DONE Add string filter box in client
 *** DONE Add timestamp to events
 *** TODO Add nrepl server inside app 
-*** TODO Refactor with stuart components
 *** TODO Persist tap structure so we don't loose it between restarts
+*** TODO Refactor with stuart components
 *** TODO Manual color selection instead of auto
 ** v2.0.0 (login and multi user)
 *** TODO ?

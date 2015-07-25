@@ -16,7 +16,7 @@
 
 (defonce app-state (atom {:state nil
                           :taps []
-                          :filter-fn (constantly true)
+                          :ev-pattern #".*"
                           :modal-open? false
                           :chsk nil
                           :selected 0
@@ -95,10 +95,7 @@
 
 (defn search-changed [e]
   (let [text (-> e .-target .-value)]
-    (when (not(empty? text))
-     (swap! app-state assoc :filter-fn (fn [role remote-addr content]
-                                         (re-matches (re-pattern (str".*" text ".*"))
-                                                     (str role remote-addr content)))))))
+    (swap! app-state assoc :ev-pattern (re-pattern (str ".*" text ".*")))))
  
 (defn header [connected]
   (let [server-address (atom "localhost:7777")]
@@ -132,19 +129,20 @@
         [selected-event (get (:events @app-state) (:selected @app-state))]]])]
    [taps (:taps @app-state)]
    [:div#events
-    [:ul (map-indexed
-          (fn [idx [timestamp remote-addr role color content]]
-                   [:li {:key idx
-                         :style {:display (if ((:filter-fn @app-state) role remote-addr content)
-                                            :block
-                                            :none)}
-                         :on-click #(select-event idx)}
-                    [:span.timestamp {:style {:background-color color}} (tf/unparse (tf/formatter "HH:mm:ss.SSS")
-                                                                                    (tc/from-long (.getTime timestamp)))] 
-                    [:span.ip {:style {:background-color color}} remote-addr]
-                    [:span.role {:style {:background-color color}} role]
-                    [:span.content {:style {:background-color color}} (str content)]])  
-                 (:events @app-state))]]])  
+    [:ul (doall
+          (map-indexed
+           (fn [idx [timestamp remote-addr role color content]]
+             [:li {:key idx
+                   :style {:display (if (re-matches (:ev-pattern @app-state) (str role remote-addr content))
+                                      :block
+                                      :none)} 
+                   :on-click #(select-event idx)}
+              [:span.timestamp {:style {:background-color color}} (tf/unparse (tf/formatter "HH:mm:ss.SSS")
+                                                                              (tc/from-long (.getTime timestamp)))] 
+              [:span.ip {:style {:background-color color}} remote-addr]
+              [:span.role {:style {:background-color color}} role]
+              [:span.content {:style {:background-color color}} (str content)]])  
+           (:events @app-state)))]]])  
 
 (reagent/render-component [ui]
                           (. js/document (getElementById "app"))) 
