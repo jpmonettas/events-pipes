@@ -11,6 +11,7 @@
             [ring.middleware.params :refer [wrap-params]]
             [taoensso.sente :as sente]
             [taoensso.sente.server-adapters.http-kit :refer (sente-web-server-adapter)])
+  (:import [java.util Date])
   (:gen-class))
 
 
@@ -73,7 +74,11 @@
   (let [event-id (str (java.util.UUID/randomUUID))]
     (>!! input-channel [:general/reporting (-> recived-event
                                               (assoc :event-id event-id)
-                                              (assoc :remote-addr remote-addr))]) 
+                                              (assoc :remote-addr (if (or (= remote-addr "127.0.0.1")
+                                                                         (= remote-addr "0:0:0:0:0:0:0:1"))
+                                                                    "localhost"
+                                                                    remote-addr))
+                                              (assoc :timestamp (Date.)))]) 
                        {:status 200
                         :body {:success true
                                :event-id event-id}}))

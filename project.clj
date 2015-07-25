@@ -10,6 +10,7 @@
                  [cljsjs/highlight "8.4-0"]
                  [http-kit "2.1.18"]
                  [reagent "0.5.0"]
+                 [com.andrewmcveigh/cljs-time "0.3.10"]
                  [com.taoensso/sente "1.5.0"]
                  [compojure "1.4.0"]
                  [ring/ring-json "0.3.1"]]

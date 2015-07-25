@@ -1,5 +1,8 @@
 /* some style */
 
+input.search{
+    float:right;
+}
 
 div.last-event {
     padding: 20px;

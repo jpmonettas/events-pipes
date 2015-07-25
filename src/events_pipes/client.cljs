@@ -5,6 +5,8 @@
               [cljs.core.async :as async :refer (<! >! put! chan timeout)]
               [taoensso.sente  :as sente :refer (cb-success?)]
               [clojure.set :as set]
+              [cljs-time.format :as tf]
+              [cljs-time.coerce :as tc]
               [cljsjs.highlight :as hl]
               [cljsjs.highlight.langs.clojure :as hlc]
               [cljs.pprint :refer [pprint]]))
@@ -14,6 +16,7 @@
 
 (defonce app-state (atom {:state nil
                           :taps []
+                          :filter-fn (constantly true)
                           :modal-open? false
                           :chsk nil
                           :selected 0
@@ -90,9 +93,14 @@
                        (.highlightBlock js/hljs (reagent/dom-node this)))})) 
 
 
+(defn search-changed [e]
+  (let [text (-> e .-target .-value)]
+    (when (not(empty? text))
+     (swap! app-state assoc :filter-fn (fn [role remote-addr content]
+                                         (re-matches (re-pattern (str".*" text ".*"))
+                                                     (str role remote-addr content)))))))
  
- 
-(defn connection [connected]
+(defn header [connected]
   (let [server-address (atom "localhost:7777")]
     (fn [props]
       [:div 
@@ -101,7 +109,9 @@
                 :on-change #(reset! server-address (-> % .-target .-value))
                 :value @server-address}]
        [:button {:on-click #(connect @server-address)} "Connect"]
-       [:button {:on-click #(clear-events)} "Clear"]])))
+       [:button {:on-click #(clear-events)} "Clear"]
+       [:input.search {:type :text
+                       :on-change #(search-changed %)}]])))
 
 (defn taps [ts]
   [:div.taps
@@ -115,7 +125,7 @@
 (defn ui []
   [:div 
    [:div#header
-    [connection]
+    [header]
     (when (:modal-open? @app-state)
       [:div.last-event
        [:pre.code {:on-click #(when (:modal-open? @app-state) (close-modal))}
@@ -123,13 +133,18 @@
    [taps (:taps @app-state)]
    [:div#events
     [:ul (map-indexed
-                 (fn [idx [remote-addr role color content]]
+          (fn [idx [timestamp remote-addr role color content]]
                    [:li {:key idx
+                         :style {:display (if ((:filter-fn @app-state) role remote-addr content)
+                                            :block
+                                            :none)}
                          :on-click #(select-event idx)}
+                    [:span.timestamp {:style {:background-color color}} (tf/unparse (tf/formatter "HH:mm:ss.SSS")
+                                                                                    (tc/from-long (.getTime timestamp)))] 
                     [:span.ip {:style {:background-color color}} remote-addr]
                     [:span.role {:style {:background-color color}} role]
-                    [:span.content {:style {:background-color color}} (str content)]]) 
-                 (:events @app-state))]]]) 
+                    [:span.content {:style {:background-color color}} (str content)]])  
+                 (:events @app-state))]]])  
 
 (reagent/render-component [ui]
                           (. js/document (getElementById "app"))) 
@@ -139,14 +154,14 @@
 ;; Incomming events handling  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
-(defn add-colored-event [state {:keys [event-id role remote-addr content]}]
+(defn add-colored-event [state {:keys [event-id timestamp role remote-addr content]}]
   (let [colors #{"#028482" "#7ABA7A" "#B76EB8" "#6BCAE2" "#51A5BA" "#41924B" "#AFEAAA" "#87E293" "#FE8402"}
         role-colors (:role-colors state)
         color (or (get role-colors role)
                   (first (set/difference colors (into #{} (vals role-colors))))
                   "black")]
     (-> state
-        (update-in [:events] conj [remote-addr role color content]) 
+        (update-in [:events] conj [timestamp remote-addr role color content]) 
         (assoc-in [:role-colors role]  color))))
 
 (defmulti event-msg-handler (fn [[ev-type ev-data]] ev-type))
