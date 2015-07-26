@@ -1,4 +1,4 @@
-(defproject events-pipes "0.1.0-SNAPSHOT"
+(defproject events-pipes "0.7.0"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -13,7 +13,13 @@
                  [com.andrewmcveigh/cljs-time "0.3.10"]
                  [com.taoensso/sente "1.5.0"]
                  [compojure "1.4.0"]
-                 [ring/ring-json "0.3.1"]]
+                 [ring/ring-json "0.3.1"]
+
+                 ;; To embeed a nrepl server in the app
+                 [org.clojure/tools.nrepl "0.2.7"]
+                 [cider/cider-nrepl "0.10.0-SNAPSHOT"]
+
+                 ]
 
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]]

@@ -9,6 +9,8 @@
             [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.params :refer [wrap-params]]
+            [clojure.tools.nrepl.server :as nrepl]
+            [cider.nrepl :refer [cider-nrepl-handler]]
             [taoensso.sente :as sente]
             [taoensso.sente.server-adapters.http-kit :refer (sente-web-server-adapter)])
   (:import [java.util Date])
@@ -24,6 +26,8 @@
   (def chsk-send!                    send-fn) ; ChannelSocket's send API fn
   (def connected-uids                connected-uids) ; Watchable, read-only atom
   )
+
+(def nrepl-server nil)
 
 ;; Events commint from outside the system arrives here
 (def input-channel (chan (sliding-buffer 100)))
@@ -122,6 +126,10 @@
 
 (defn  stop-router! [] (when-let [stop-f @router_] (stop-f)))
 
+(defn start-nrepl-server []
+  (alter-var-root #'nrepl-server
+                  (fn [s] (nrepl/start-server :handler cider-nrepl-handler :port 7778))))
+
 (defn start-router! []
   (stop-router!)
   (reset! router_ (sente/start-chsk-router! ch-chsk event-msg-handler*)))
@@ -147,8 +155,7 @@
 
 (defn -main
   [& args]
-  ;; Load system configuration using any environment method like
-  ;; java -jar kiosko.jar /home/config.clj
+  (start-nrepl-server)
   
   (start)
 
@@ -163,4 +170,7 @@
                "/input/errors"
                "super")
   
-  (println "Done! Point your browser to http://localhost:7777/index.html"))
+  
+  
+  (println "Done! Point your browser to http://this-box:7777/index.html")
+  (println "You also have an nrepl server at 7778"))
