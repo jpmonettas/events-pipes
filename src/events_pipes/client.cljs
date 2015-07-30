@@ -21,7 +21,7 @@
                           :chsk nil
                           :selected 0
                           :role-colors {}
-                          :events []}))
+                          :events ()}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 ;; Incomming channel messages router ;;
@@ -86,8 +86,8 @@
 ;; ----------
 (def selected-event
   (with-meta
-    (fn [ev]
-      (when ev [:code {:class "clojure"} (with-out-str (-> ev last pprint))]))
+    (fn [{:keys [summary detail] :as ev}]
+      [:code {:class "clojure"} (with-out-str (pprint detail))])
     {:component-did-mount
                      (fn [this old-props old-childs]
                        (.highlightBlock js/hljs (reagent/dom-node this)))})) 
@@ -96,44 +96,55 @@
 (defn search-changed [e]
   (let [text (-> e .-target .-value)]
     (swap! app-state assoc :ev-pattern (re-pattern (str ".*" text ".*")))))
- 
-(defn header [connected]
-  (let [server-address (atom "localhost:7777")]
-    (fn [props]
-      [:div 
-       [:label "Sever:"]
-       [:input {:type :text
-                :on-change #(reset! server-address (-> % .-target .-value))
-                :value @server-address}]
-       [:button {:on-click #(connect @server-address)} "Connect"]
-       [:button {:on-click #(clear-events)} "Clear"]
-       [:input.search {:type :text
-                       :on-change #(search-changed %)}]])))
 
 (defn taps [ts]
   [:div.taps
    (for [t ts]
      (if (:muted? t)
        [:button.btn.btn-danger {:key (:id t) :on-click #(toggle-tap (:id t))}
+        [:span.glyphicon.glyphicon-eye-close] 
         (:id t)]
        [:button.btn.btn-success {:key (:id t) :on-click #(toggle-tap (:id t))}
+        [:span.glyphicon.glyphicon-eye-open]
         (:id t)]))])
 
+(defn header [connected]
+  (let [server-address (atom "localhost:7777")]
+    (fn [props]
+      [:div.form-inline.server-container 
+       [:div.input-group.server
+        [:span.input-group-addon "Sever:"]
+        [:input.form-control {:type :text
+                              :on-change #(reset! server-address (-> % .-target .-value))
+                              :value @server-address}]]
+       [:button.btn.btn-info {:on-click #(connect @server-address)} [:span.glyphicon.glyphicon-link]]
+       [:button.btn.btn-danger.clear {:on-click #(clear-events)} [:span.glyphicon.glyphicon-trash]]
+       
+       [:div.input-group.search
+        [:span.glyphicon.glyphicon-search.input-group-addon]
+        [:input.search.form-control {:type :text
+                                     :on-change #(search-changed %)}]]
+       [taps (:taps @app-state)]])))
+
+
+  
 (defn ui []
   [:div 
    [:div#header
     [header]
     (when (:modal-open? @app-state)
-      [:div.last-event
-       [:pre.code {:on-click #(when (:modal-open? @app-state) (close-modal))}
-        [selected-event (get (:events @app-state) (:selected @app-state))]]])]
-   [taps (:taps @app-state)]
+      (let [ev (nth (:events @app-state) (:selected @app-state))]
+          [:div.last-event {:on-click #(when (:modal-open? @app-state) (close-modal))}
+           [:div.summary (:summary ev)]
+           (when (:detail ev)
+             [:pre.code 
+              [selected-event ev]])]))]
    [:div#events
     [:ul (doall
           (map-indexed
-           (fn [idx [timestamp remote-addr role color content]]
+           (fn [idx {:keys [timestamp remote-addr role color summary detail]}]
              [:li {:key idx
-                   :style {:display (if (re-matches (:ev-pattern @app-state) (str role remote-addr content))
+                   :style {:display (if (re-matches (:ev-pattern @app-state) (str role remote-addr summary detail))
                                       :block
                                       :none)} 
                    :on-click #(select-event idx)}
@@ -141,7 +152,7 @@
                                                                               (tc/from-long (.getTime timestamp)))] 
               [:span.ip {:style {:background-color color}} remote-addr]
               [:span.role {:style {:background-color color}} role]
-              [:span.content {:style {:background-color color}} (str content)]])  
+              [:span.content {:style {:background-color color}} (str summary)]])  
            (:events @app-state)))]]])  
 
 (reagent/render-component [ui]
@@ -152,14 +163,14 @@
 ;; Incomming events handling  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
-(defn add-colored-event [state {:keys [event-id timestamp role remote-addr content]}]
+(defn add-colored-event [state {:keys [event-id timestamp role remote-addr sumary detail] :as ev}]
   (let [colors #{"#028482" "#7ABA7A" "#B76EB8" "#6BCAE2" "#51A5BA" "#41924B" "#AFEAAA" "#87E293" "#FE8402"}
         role-colors (:role-colors state)
         color (or (get role-colors role)
                   (first (set/difference colors (into #{} (vals role-colors))))
                   "black")]
     (-> state
-        (update-in [:events] conj [timestamp remote-addr role color content]) 
+        (update-in [:events] conj (assoc ev :color color)) 
         (assoc-in [:role-colors role]  color))))
 
 (defmulti event-msg-handler (fn [[ev-type ev-data]] ev-type))

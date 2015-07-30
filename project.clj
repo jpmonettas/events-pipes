@@ -1,4 +1,4 @@
-(defproject events-pipes "0.7.0"
+(defproject events-pipes "0.8.0"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"

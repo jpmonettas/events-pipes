@@ -10,6 +10,7 @@
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.params :refer [wrap-params]]
             [clojure.tools.nrepl.server :as nrepl]
+            [clojure.pprint :as pp]
             [cider.nrepl :refer [cider-nrepl-handler]]
             [taoensso.sente :as sente]
             [taoensso.sente.server-adapters.http-kit :refer (sente-web-server-adapter)])
@@ -55,21 +56,25 @@
   (notify-taps-change))
 
 
+(defmacro add-ch [from-id name transducer-form]
+  `(add-channel ~from-id ~name ~transducer-form (quote ~transducer-form)))
 
- 
-(defn add-channel [ch from-id name]
+(defn add-channel [from-id name transducer transducer-form]
   (let [new-id (str (get-in @channels [from-id :id]) "/" (str/lower-case name))
         from-mult (get-in @channels [from-id :mult])
+        ch (chan (sliding-buffer 100) transducer)
         ch-mult (mult ch)
         mix-ch (chan (sliding-buffer 100))]
     (swap! channels assoc new-id {:id new-id
+                                  :from-id from-id
+                                  :transducer-form transducer-form
                                   :mix-channel mix-ch
                                   :mult ch-mult
                                   :name name
-                                  :muted? false})
+                                  :muted? true})
     (tap from-mult ch)
     (tap ch-mult mix-ch)
-    (admix output-mix mix-ch)
+    (toggle output-mix {mix-ch {:mute true}})
     (notify-taps-change)
     new-id))
 
@@ -83,9 +88,9 @@
                                                                     "localhost"
                                                                     remote-addr))
                                               (assoc :timestamp (Date.)))]) 
-                       {:status 200
-                        :body {:success true
-                               :event-id event-id}}))
+    {:status 200
+     :body {:success true
+            :event-id event-id}}))
 
 (defroutes api-routes
   (POST "/event" req (post-event (:remote-addr req) (-> req keywordize-keys :body))))
@@ -134,16 +139,20 @@
   (stop-router!)
   (reset! router_ (sente/start-chsk-router! ch-chsk event-msg-handler*)))
 
-(defn start []
+(defn reset-channels []
   (reset! channels (let [ch-mult (mult input-channel)]
                      {"/input"
                       {:id "/input"
                        :mix-channel (tap ch-mult (chan (sliding-buffer 10)))
                        :mult ch-mult
                        :name "input"
-                       :muted? false}}))
+                       :muted? true}}))
 
-  (admix output-mix (get-in @channels ["/input" :mix-channel]))
+  (toggle output-mix {(get-in @channels ["/input" :mix-channel]) {:mute true}}))
+
+(defn start []
+  
+  (reset-channels)
   
   (http-server/run-server #'my-app {:port 7777 :join? false})
 
@@ -153,22 +162,49 @@
     (chsk-send! :sente/all-users-without-uid (<! output-channel))
     (recur)))
 
+(defn ls-ch []
+  (pp/print-table [:id :transducer-form] (sort-by :id (vals @channels))))
+
+(defn dump-taps [file]
+  (spit file
+        (with-out-str
+          (->> 
+           @channels
+           vals
+           (map #(select-keys % [:id :from-id :name :transducer-form]))
+           pp/pprint))))
+
+(defn load-taps
+  "This will only work if your channels are empty (not intended for reload)"
+  [file]
+  (doseq [t (->> file
+               slurp
+               read-string
+               (remove #(= (:id %) "/input"))
+               (sort-by :id))]
+    
+    (add-channel (:from-id t)
+                 (:name t)
+                 (eval (:transducer-form t))
+                 (:transducer-form t))))
+
 (defn -main
-  [& args]
+  [& [taps-file & _]]
   (start-nrepl-server)
   
   (start)
 
+  (when taps-file
+    (load-taps taps-file))
+  
   ;; Setup hardcoded channels
-  #_(add-channel (chan (sliding-buffer 100)
-                     (filter (fn [[_ {:keys [role]}]] (= role "error"))))
-               "/input"
-               "errors")
+  #_(add-ch "/input"
+            "errors"
+            (filter (fn [[_ {:keys [role]}]] (= role "error"))))
 
-  #_(add-channel (chan (sliding-buffer 100)
-                       (filter (fn [[_ {:keys [role content]}]] (re-matches #".*super.*" content))))
-               "/input/errors"
-               "super")
+  #_(add-ch "/input/errors"
+            "super"
+            (filter (fn [[_ {:keys [role content]}]] (re-matches #".*super.*" content))))
   
   
   

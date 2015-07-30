@@ -1,21 +1,39 @@
 /* some style */
 
-input.search{
+div.server{
+    width:200px;
+}
+div.server-container > button{
+    margin-left:5px;
+}
+
+div.server-container > button.clear{
+    margin-left: 50px; 
+}
+
+div.search{
     float:right;
 }
 
 div.last-event {
     padding: 20px;
-    position: absolute;
+    position: fixed;
     width: 80%;
     left: 10%;
-    height: 400px;
-    
 }
 
-div.last-event>a{
-    margin-left:45%;
+div.last-event > pre {
+    height: 400px;
+    overflow: scroll;
 }
+
+
+div.last-event > div.summary{
+    background-color:#f0f0f0;
+    font-weight: bold;
+    border: 1px solid;
+}
+
 
 div.taps{
     padding: 5px;
@@ -23,6 +41,11 @@ div.taps{
 div.taps > button{
     margin-right:5px;
 }
+div.taps > button > span{
+    margin-right:6px;
+}
+
+
 span.ip, span.role{
     border: 1px solid;
     margin: 2px;
@@ -32,12 +55,17 @@ ul{
     padding-left: 0px;
 }
 div#events{
-    margin-top: 0px;
+    margin-top: 100px;
     height: 100px;
 }
 
 div#header{
     background-color: white;
+    position: fixed;
+    top: 0px;
+    height: 80px;
+    width:100%;
+    border: 1px solid;
 }
 
 li{

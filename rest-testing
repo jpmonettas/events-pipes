@@ -2,7 +2,8 @@ POST http://localhost:7777/event
 Content-Type: application/json
 
 {"role": "role1",
-"content": {
+"summary": "Example glossary",
+"detail": {
     "glossary": {
         "title": "example glossary",
 		"GlossDiv": {
@@ -31,12 +32,14 @@ POST http://localhost:7777/event
 Content-Type: application/json
 
 {"role": "error",
-"content": "What's up yo! Fer"}
+"summary": "What's up yo! Fer"}
 
 ###
 
 POST http://localhost:7777/event
 Content-Type: application/json
 
-{"role": "other",
-"content": "What's up yo super ! Fer"}
+{"role": "pepe",
+"summary": "What's up yo super tongo ! Fer",
+"detail": ["One", "Two", "Three"]}
+
