@@ -9,7 +9,8 @@
               [cljs-time.coerce :as tc]
               [cljsjs.highlight :as hl]
               [cljsjs.highlight.langs.clojure :as hlc]
-              [cljs.pprint :refer [pprint]]))
+              [cljs.pprint :refer [pprint]]
+              [amalloy.ring-buffer :refer [ring-buffer]]))
  
 (enable-console-print!)
 
@@ -19,9 +20,9 @@
                           :ev-pattern #".*"
                           :modal-open? false
                           :chsk nil
-                          :selected 0
+                          :selected nil
                           :role-colors {}
-                          :events ()}))
+                          :events (ring-buffer 1000)}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 ;; Incomming channel messages router ;;
@@ -48,9 +49,9 @@
 
 ;; User events handling
 ;; --------------------
-(defn select-event [idx]
+(defn select-event [ev]
   (swap! app-state (fn [s] (-> s
-                               (assoc :selected idx)
+                               (assoc :selected ev)
                                (assoc :modal-open? true)))))
 
 (defn close-modal []
@@ -133,7 +134,7 @@
    [:div#header
     [header]
     (when (:modal-open? @app-state)
-      (let [ev (nth (:events @app-state) (:selected @app-state))]
+      (let [ev (:selected @app-state)]
           [:div.last-event {:on-click #(when (:modal-open? @app-state) (close-modal))}
            [:div.summary (:summary ev)]
            (when (:detail ev)
@@ -142,18 +143,16 @@
    [:div#events
     [:ul (doall
           (map-indexed
-           (fn [idx {:keys [timestamp remote-addr role color summary detail]}]
+           (fn [idx {:keys [timestamp remote-addr role color summary detail] :as ev}]
              [:li {:key idx
-                   :style {:display (if (re-matches (:ev-pattern @app-state) (str role remote-addr summary detail))
-                                      :block
-                                      :none)} 
-                   :on-click #(select-event idx)}
+                   :on-click #(select-event ev)}
               [:span.timestamp {:style {:background-color color}} (tf/unparse (tf/formatter "HH:mm:ss.SSS")
                                                                               (tc/from-long (.getTime timestamp)))] 
               [:span.ip {:style {:background-color color}} remote-addr]
               [:span.role {:style {:background-color color}} role]
               [:span.content {:style {:background-color color}} (str summary)]])  
-           (:events @app-state)))]]])  
+           (filter #(re-matches (:ev-pattern @app-state) (apply str %))
+                   (:events @app-state))))]]])  
 
 (reagent/render-component [ui]
                           (. js/document (getElementById "app"))) 
