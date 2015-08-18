@@ -21,8 +21,9 @@
                           :modal-open? false
                           :chsk nil
                           :selected nil
+                          :selected-tab "/input"
                           :role-colors {}
-                          :events (ring-buffer 1000)}))
+                          :events {}}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 ;; Incomming channel messages router ;;
@@ -79,7 +80,7 @@
         (send-fn [:taps/please-refresh]))))
  
 (defn clear-events []
-  (swap! app-state merge {:selected 0 :role-colors {} :events []})) 
+  (swap! app-state merge {:selected 0 :role-colors {} :events {}})) 
 
 
 
@@ -127,8 +128,28 @@
                                      :on-change #(search-changed %)}]]
        [taps (:taps @app-state)]])))
 
+(defn events []
+  [:div#events
+   [:ul.nav.nav-tabs
+    (doall (for [t (keys (:events @app-state))]
+             [:li (merge
+                   {:on-click #(swap! app-state assoc :selected-tab t)}
+                   (when (= (:selected-tab @app-state) t) {:class :active})) [:a t]]))]
+    [:div.tab-content
+     [:ul (doall
+           (map-indexed
+            (fn [idx {:keys [timestamp remote-addr role color summary detail] :as ev}]
+              [:li {:key idx
+                    :on-click #(select-event ev)}
+               [:span.timestamp {:style {:background-color color}} (tf/unparse (tf/formatter "HH:mm:ss.SSS")
+                                                                               (tc/from-long (.getTime timestamp)))] 
+               [:span.ip {:style {:background-color color}} remote-addr]
+               [:span.role {:style {:background-color color}} role]
+               [:span.content {:style {:background-color color}} (str summary)]])  
+            (filter #(re-matches (:ev-pattern @app-state) (apply str %))
+                    (get-in @app-state [:events (:selected-tab @app-state)]))))]]])
 
-  
+
 (defn ui []
   [:div 
    [:div#header
@@ -140,19 +161,7 @@
            (when (:detail ev)
              [:pre.code 
               [selected-event ev]])]))]
-   [:div#events
-    [:ul (doall
-          (map-indexed
-           (fn [idx {:keys [timestamp remote-addr role color summary detail] :as ev}]
-             [:li {:key idx
-                   :on-click #(select-event ev)}
-              [:span.timestamp {:style {:background-color color}} (tf/unparse (tf/formatter "HH:mm:ss.SSS")
-                                                                              (tc/from-long (.getTime timestamp)))] 
-              [:span.ip {:style {:background-color color}} remote-addr]
-              [:span.role {:style {:background-color color}} role]
-              [:span.content {:style {:background-color color}} (str summary)]])  
-           (filter #(re-matches (:ev-pattern @app-state) (apply str %))
-                   (:events @app-state))))]]])  
+   [events]])  
 
 (reagent/render-component [ui]
                           (. js/document (getElementById "app"))) 
@@ -162,14 +171,16 @@
 ;; Incomming events handling  ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; 
 
-(defn add-colored-event [state {:keys [event-id timestamp role remote-addr sumary detail] :as ev}]
+(defn add-colored-event [state {:keys [event-id tap-id timestamp role remote-addr sumary detail] :as ev}]
   (let [colors #{"#028482" "#7ABA7A" "#B76EB8" "#6BCAE2" "#51A5BA" "#41924B" "#AFEAAA" "#87E293" "#FE8402"}
         role-colors (:role-colors state)
         color (or (get role-colors role)
                   (first (set/difference colors (into #{} (vals role-colors))))
                   "black")]
     (-> state
-        (update-in [:events] conj (assoc ev :color color)) 
+        (update-in [:events tap-id] (fn [tap-evs]
+                                      (conj (or tap-evs (ring-buffer 1000))
+                                            (assoc ev :color color)))) 
         (assoc-in [:role-colors role]  color))))
 
 (defmulti event-msg-handler (fn [[ev-type ev-data]] ev-type))

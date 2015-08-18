@@ -31,7 +31,7 @@
 (def nrepl-server nil)
 
 ;; Events commint from outside the system arrives here
-(def input-channel (chan (sliding-buffer 100)))
+(def input-channel (chan (sliding-buffer 100) (map #(assoc % :tap-id "/input"))))
 
 ;; Every event put here will end up in the browser
 (def output-channel (chan (sliding-buffer 100)))
@@ -62,7 +62,9 @@
 (defn add-channel [from-id name transducer transducer-form]
   (let [new-id (str (get-in @channels [from-id :id]) "/" (str/lower-case name))
         from-mult (get-in @channels [from-id :mult])
-        ch (chan (sliding-buffer 100) transducer)
+        ch (chan (sliding-buffer 100) (comp
+                                       (map #(assoc % :tap-id new-id))
+                                       transducer))
         ch-mult (mult ch)
         mix-ch (chan (sliding-buffer 100))]
     (swap! channels assoc new-id {:id new-id
@@ -81,13 +83,13 @@
 
 (defn post-event [remote-addr recived-event]
   (let [event-id (str (java.util.UUID/randomUUID))]
-    (>!! input-channel [:general/reporting (-> recived-event
-                                              (assoc :event-id event-id)
-                                              (assoc :remote-addr (if (or (= remote-addr "127.0.0.1")
-                                                                         (= remote-addr "0:0:0:0:0:0:0:1"))
-                                                                    "localhost"
-                                                                    remote-addr))
-                                              (assoc :timestamp (Date.)))]) 
+    (>!! input-channel (-> recived-event
+                          (assoc :event-id event-id)
+                          (assoc :remote-addr (if (or (= remote-addr "127.0.0.1")
+                                                     (= remote-addr "0:0:0:0:0:0:0:1"))
+                                                "localhost"
+                                                remote-addr))
+                          (assoc :timestamp (Date.)))) 
     {:status 200
      :body {:success true
             :event-id event-id}}))
@@ -159,7 +161,7 @@
   (start-router!)
   
   (go-loop []
-    (chsk-send! :sente/all-users-without-uid (<! output-channel))
+    (chsk-send! :sente/all-users-without-uid [:general/reporting (<! output-channel)])
     (recur)))
 
 (defn ls-ch []
@@ -200,11 +202,11 @@
   ;; Setup hardcoded channels
   #_(add-ch "/input"
             "errors"
-            (filter (fn [[_ {:keys [role]}]] (= role "error"))))
+            (filter (fn [{:keys [role]}] (= role "error"))))
 
   #_(add-ch "/input/errors"
             "super"
-            (filter (fn [[_ {:keys [role content]}]] (re-matches #".*super.*" content))))
+            (filter (fn [{:keys [summary]}] (re-matches #".*super.*" summary))))
   
   
   

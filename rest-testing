@@ -39,6 +39,14 @@ Content-Type: application/json
 POST http://localhost:7777/event
 Content-Type: application/json
 
+{"role": "error",
+"summary": "This is super"}
+
+###
+
+POST http://localhost:7777/event
+Content-Type: application/json
+
 {"role": "pepe",
 "summary": "What's up yo super tongo ! Fer",
 "detail": ["One", "Two", "Three"]}

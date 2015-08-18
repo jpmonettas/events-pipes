@@ -68,7 +68,7 @@ div#header{
     border: 1px solid;
 }
 
-li{
+.tab-content li{
     height: 18px;
     overflow: hidden;
 }
