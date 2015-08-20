@@ -20,6 +20,7 @@ div.last-event {
     position: fixed;
     width: 80%;
     left: 10%;
+    top:140px;
 }
 
 div.last-event > pre {

@@ -1,4 +1,4 @@
-(defproject events-pipes "0.8.0"
+(defproject events-pipes "0.9.0"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -28,6 +28,8 @@
   
   :source-paths ["src"]
 
+  ;; This is commented out because it's breaking the uberjar (not including the js)
+  ;; try rm resources/public/js/compiled -rf, the cljsbuild once, and then uberjar
   ;;:clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
