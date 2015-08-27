@@ -145,7 +145,7 @@
                                                                                (tc/from-long (.getTime timestamp)))] 
                [:span.ip {:style {:background-color color}} remote-addr]
                [:span.role {:style {:background-color color}} role]
-               [:span.content {:style {:background-color color}} (str summary)]])  
+               [:span.content {:style {:background-color color}} (when detail [:span.glyphicon.glyphicon-fullscreen]) (str summary)]])  
             (filter #(re-matches (:ev-pattern @app-state) (apply str %))
                     (get-in @app-state [:events (:selected-tab @app-state)]))))]]])
 

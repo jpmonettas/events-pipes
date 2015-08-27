@@ -55,6 +55,18 @@ span.ip, span.role{
 ul{
     padding-left: 0px;
 }
+
+ul.nav-tabs{
+    position: fixed;
+    background-color: white;
+    z-index: 1000;
+}
+
+div.tab-content{
+    position: relative;
+    top: 50px;
+}
+
 div#events{
     margin-top: 100px;
     height: 100px;
@@ -67,6 +79,7 @@ div#header{
     height: 80px;
     width:100%;
     border: 1px solid;
+    z-index:1000;
 }
 
 .tab-content li{
