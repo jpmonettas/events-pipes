@@ -19,7 +19,11 @@
                  [org.clojure/tools.nrepl "0.2.7"]
                  [cider/cider-nrepl "0.10.0-SNAPSHOT"]
 
-                 [amalloy/ring-buffer "1.2"]]
+                 [aleph "0.4.0"]
+                 [manifold "0.1.0"]
+                 [amalloy/ring-buffer "1.2"]
+                 [byte-streams "0.2.0"]
+                 [clj-json "0.5.3"]]
 
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]]

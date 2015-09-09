@@ -5,12 +5,16 @@
             [compojure.core :refer :all]
             [compojure.route :as cr]
             [compojure.route :as route]
+            [clj-json.core :as json]
             [org.httpkit.server :as http-server]
             [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.params :refer [wrap-params]]
             [clojure.tools.nrepl.server :as nrepl]
             [clojure.pprint :as pp]
+            [aleph.udp :as udp]
+            [manifold.stream :as ms]
+            [byte-streams :as bs]
             [cider.nrepl :refer [cider-nrepl-handler]]
             [taoensso.sente :as sente]
             [taoensso.sente.server-adapters.http-kit :refer (sente-web-server-adapter)])
@@ -152,12 +156,24 @@
 
   (toggle output-mix {(get-in @channels ["/input" :mix-channel]) {:mute true}}))
 
+(defn start-udp-server [{:keys [port]}]
+  (let [udp-stream @(udp/socket {:port port})]
+    (go-loop []
+      (let [{:keys [host message]} @(ms/take! udp-stream)
+            ev (-> (bs/convert message String)
+                  json/parse-string
+                  keywordize-keys)]
+        (post-event host ev)
+        (recur)))))
+
 (defn start []
   
   (reset-channels)
   
   (http-server/run-server #'my-app {:port 7777 :join? false})
 
+  (start-udp-server {:port 7777})
+  
   (start-router!)
   
   (go-loop []
@@ -204,11 +220,23 @@
             "errors"
             (filter (fn [{:keys [role]}] (= role "error"))))
 
-  #_(add-ch "/input/errors"
-            "super"
-            (filter (fn [{:keys [summary]}] (re-matches #".*super.*" summary))))
   
-  
-  
+  #_(add-ch "/input"
+          "core-hibernate"
+          (filter (fn [{:keys [summary]}] (re-matches #"ObjectMessage.*" summary))))
+
+  #_(add-ch "/input"
+            "core-debug"
+            (filter (fn [{:keys [role]}] (#{"DEBUG" "INFO" "WARN" "ERROR"} role))))
+
+  #_(add-ch "/input/core-debug"
+          "testing"
+          (filter (fn [{:keys [role]}] (#{"DEBUG" "INFO" "WARN" "ERROR"} role))))
+
+  #(add-ch "/input/k-normal"
+           "gecom"
+           (filter (fn [{:keys [summary]}] (re-matches #"REST.*" summary))))
+
+  (println "Receiving events on POST to http://this-box:7777/event or UDP datagram on 7777") 
   (println "Done! Point your browser to http://this-box:7777/index.html")
   (println "You also have an nrepl server at 7778"))
