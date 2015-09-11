@@ -160,9 +160,14 @@
   (let [udp-stream @(udp/socket {:port port})]
     (go-loop []
       (let [{:keys [host message]} @(ms/take! udp-stream)
-            ev (-> (bs/convert message String)
-                  json/parse-string
-                  keywordize-keys)]
+            ev (try
+                 (-> (bs/convert message String)
+                   json/parse-string
+                   keywordize-keys)
+                 (catch Exception e
+                   {:role "MALFORMED-UDP-INPUT-EVENT"
+                    :summary (str "MALFORMED UDP INPUT EVENT from " host)
+                    :detail (bs/convert message String)}))]
         (post-event host ev)
         (recur)))))
 
