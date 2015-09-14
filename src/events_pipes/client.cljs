@@ -3,22 +3,26 @@
      [cljs.core.async.macros :as asyncm :refer (go go-loop)])
     (:require [reagent.core :as reagent :refer [atom]]
               [cljs.core.async :as async :refer (<! >! put! chan timeout)]
+              [clojure.string :as str]
               [taoensso.sente  :as sente :refer (cb-success?)]
               [clojure.set :as set]
               [cljs-time.format :as tf]
               [cljs-time.coerce :as tc]
-              [cljsjs.highlight :as hl]
-              [cljsjs.highlight.langs.clojure :as hlc]
+              [cljsjs.highlight]
+              [cljsjs.d3] 
+              [cljsjs.highlight.langs.clojure]
               [cljs.pprint :refer [pprint]]
               [amalloy.ring-buffer :refer [ring-buffer]]))
  
 (enable-console-print!)
 
 
+
 (defonce app-state (atom {:state nil
                           :taps []
                           :ev-pattern #".*"
                           :modal-open? false
+                          :taps-panel-open? true
                           :chsk nil
                           :selected nil
                           :selected-tab "/input"
@@ -80,8 +84,10 @@
         (send-fn [:taps/please-refresh]))))
  
 (defn clear-events []
-  (swap! app-state merge {:selected 0 :role-colors {} :events {}})) 
+  (swap! app-state merge {:selected 0 :role-colors {} :events {}}))
 
+(defn toggle-taps-panel []
+  (swap! app-state update-in [:taps-panel-open?] #(not %))) 
 
 
 ;; Components
@@ -99,16 +105,7 @@
   (let [text (-> e .-target .-value)]
     (swap! app-state assoc :ev-pattern (re-pattern (str ".*" text ".*")))))
 
-(defn taps [ts]
-  [:div.taps
-   (for [t ts]
-     (if (:muted? t)
-       [:button.btn.btn-danger {:key (:id t) :on-click #(toggle-tap (:id t))}
-        [:span.glyphicon.glyphicon-eye-close] 
-        (:id t)]
-       [:button.btn.btn-success {:key (:id t) :on-click #(toggle-tap (:id t))}
-        [:span.glyphicon.glyphicon-eye-open]
-        (:id t)]))])
+
 
 (defn header [connected]
   (let [server-address (atom "localhost:7777")]
@@ -125,8 +122,7 @@
        [:div.input-group.search
         [:span.glyphicon.glyphicon-search.input-group-addon]
         [:input.search.form-control {:type :text
-                                     :on-change #(search-changed %)}]]
-       [taps (:taps @app-state)]])))
+                                     :on-change #(search-changed %)}]]])))
 
 (defn events []
   [:div#events
@@ -150,10 +146,20 @@
                     (get-in @app-state [:events (:selected-tab @app-state)]))))]]])
 
 
+(defn taps-panel []
+  [:div#taps-panel {:class (when (:taps-panel-open? @app-state)
+                             "taps-panel-open")}
+   [:span.glyphicon {:class (if (:taps-panel-open? @app-state)
+                              "glyphicon-menu-left"
+                              "glyphicon-menu-right")
+                     :on-click toggle-taps-panel} ""]
+   [:div#taps-tree]]) 
+
 (defn ui []
   [:div 
    [:div#header
     [header]
+    [taps-panel]
     (when (:modal-open? @app-state)
       (let [ev (:selected @app-state)]
           [:div.last-event {:on-click #(when (:modal-open? @app-state) (close-modal))}
@@ -183,6 +189,99 @@
                                             (assoc ev :color color)))) 
         (assoc-in [:role-colors role]  color))))
 
+(defn taps-tree [taps]
+  (let [taps-tr (reduce (fn [tree tap]
+                          (let [path (vec (drop 2 (str/split (:id tap) #"/")))]
+                            (assoc-in tree (conj path :data)  tap)))
+                        {}
+                        taps)
+        make-tree (fn make-tree [tr]
+                    (let [childs (map second (filter (comp string? first) tr))
+                          data (second (first (filter (comp keyword? first) tr)))]
+                      (if-not (empty? childs)
+                        (assoc data :children (mapv make-tree childs))
+                        data)))]
+    (make-tree (vec taps-tr)))) 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Crazy stuff to draw the tree using d3 ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn draw-taps-tree [taps-tr]
+  (set! (.-innerHTML (.getElementById js/document "taps-tree")) "")
+  (let [margin {:top 20 :right 120 :bottom 20 :left 120}
+        width (- 960 (:right margin) (:left margin))
+        height (- 500 (:top margin) (:bottom margin))
+
+        svg (-> js/d3 
+                (.select "div#taps-tree")
+                (.append "svg")
+                (.attr "width" (+ width (:right margin) (:left margin)))
+                (.attr "height" (+ height (:top margin) (:bottom margin)))
+                (.append "g")
+                (.attr "transform" (str "translate(" (:left margin) "," (:top margin) ")")))
+
+ 
+ 
+        tree (-> js/d3
+                 .-layout 
+                 .tree
+                 (.size (clj->js [height width])))
+
+        diagonal (-> js/d3
+                     .-svg
+                     .diagonal
+                     (.projection (fn [d]
+                                    #js [(.-y d) (.-x d)])))
+
+        nodes (-> tree
+                  (.nodes taps-tr)
+                  .reverse)
+        _ (.forEach nodes
+                    (fn [d] (set! (.-y d) (* (.-depth d) 200)))) 
+        links (.links tree nodes)
+        node (-> svg
+                 (.selectAll "g.node")
+                 (.data nodes (fn [d] (.-id d))))
+        link (-> svg 
+                 (.selectAll "path.link")
+                 (.data links (fn [d] (-> d
+                                          .-target
+                                          .-id))))
+        node-enter (-> (.enter node)
+                       (.append "g")
+                       (.on "click" (fn [d] (toggle-tap (.-id d))))
+                       (.attr "class" "node")
+                       (.attr "transform" (fn [d]
+                                            (str "translate(" (.-y d) "," (.-x d) ")"))))]
+    
+    (-> node-enter
+        (.append "circle")
+        (.attr "r" 10)
+        (.style "fill" (fn [d] (if (aget d "muted?")
+                                 "#ff0000"
+                                 "#00ff00"))))
+
+    (-> node-enter
+        (.append "text")
+        (.attr "x" 13)
+        (.attr "dy" ".35em") 
+        (.attr "text-anchor" "start")
+        (.text (fn [d] (.-name d)))
+        (.style "fill-opacity" 1))
+
+    (-> (.enter link)
+        (.insert "path" "g")
+        (.attr "class" "link")
+        (.attr "d" diagonal))))
+
+ 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Endo of Crazy stuff to draw the tree using d3 ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
 (defmulti event-msg-handler (fn [[ev-type ev-data]] ev-type))
 
 (defmethod event-msg-handler :general/reporting
@@ -191,7 +290,10 @@
 
 (defmethod event-msg-handler :taps/refreshed
   [[_ new-taps]]
-  (swap! app-state assoc :taps new-taps))
+  (swap! app-state assoc :taps new-taps)
+  (draw-taps-tree (-> (:taps @app-state)
+                      taps-tree
+                      clj->js)))
 
 (defmethod event-msg-handler :default
   [e]

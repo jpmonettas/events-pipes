@@ -19,9 +19,11 @@
                  [org.clojure/tools.nrepl "0.2.7"]
                  [cider/cider-nrepl "0.10.0-SNAPSHOT"]
 
+                 [cljsjs/d3 "3.5.5-3"]
+                 
                  [aleph "0.4.0"]
                  [manifold "0.1.0"]
-                 [amalloy/ring-buffer "1.2"]
+                 [amalloy/rhing-buffer "1.2"]
                  [byte-streams "0.2.0"]
                  [clj-json "0.5.3"]]
 
@@ -34,7 +36,7 @@
 
   ;; This is commented out because it's breaking the uberjar (not including the js)
   ;; try rm resources/public/js/compiled -rf, the cljsbuild once, and then uberjar
-  ;;:clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
     :builds [{:id "dev"
