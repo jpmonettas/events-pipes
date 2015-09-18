@@ -8,6 +8,7 @@
             [clj-json.core :as json]
             [org.httpkit.server :as http-server]
             [ring.middleware.json :refer [wrap-json-response wrap-json-body]]
+            [ring.middleware.cors :refer [wrap-cors]]
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.params :refer [wrap-params]]
             [clojure.tools.nrepl.server :as nrepl]
@@ -111,6 +112,8 @@
       ring.middleware.keyword-params/wrap-keyword-params
       ring.middleware.params/wrap-params)
    (-> api-routes
+      (wrap-cors :access-control-allow-origin [#".*"]
+                 :access-control-allow-methods [:post])
       (wrap-json-body)
       (wrap-json-response))
    (cr/resources "/")))

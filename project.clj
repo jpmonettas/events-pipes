@@ -1,4 +1,4 @@
-(defproject events-pipes "0.10.1"
+(defproject events-pipes "0.11.0"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -23,9 +23,10 @@
                  
                  [aleph "0.4.0"]
                  [manifold "0.1.0"]
-                 [amalloy/rhing-buffer "1.2"]
+                 [amalloy/ring-buffer "1.2"]
                  [byte-streams "0.2.0"]
-                 [clj-json "0.5.3"]]
+                 [clj-json "0.5.3"]
+                 [ring-cors "0.1.7"]]
 
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]]
@@ -36,7 +37,7 @@
 
   ;; This is commented out because it's breaking the uberjar (not including the js)
   ;; try rm resources/public/js/compiled -rf, the cljsbuild once, and then uberjar
-  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+  ;;:clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
     :builds [{:id "dev"
