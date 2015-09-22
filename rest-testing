@@ -51,3 +51,17 @@ Content-Type: application/json
 "summary": "What's up yo super tongo ! Fer",
 "detail": ["One", "Two", "Three"]}
 
+###
+POST http://192.168.1.5:7777/event
+Content-Type: application/json
+
+{"thread-id":"1",
+"role":"web",
+"summary": "Get TOTAL entradas",
+"detail": {"head":{"request":{"uri":"192.168.1.5:8080\/LifeREST2.0\/price\/schedule\/05771956-4cc6-11e5-835c-bc5ff43cc3f7\/calculateTotalPrice?priceTypeId=2&promoId=0&api_key=d496d812-21ab-4635-ab5a-bd36f0f17a25",
+"method":"POST",
+"payload":"[{\"ticketCatId\":\"1\",
+\"cant\":\"1\"}]"},
+"code":200},
+"body":{"total":122,
+"saleUnits":[{"priceId":"3f37b5d1-4cf2-11e5-835c-bc5ff43cc3f7","quantity":1}]}}}

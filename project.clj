@@ -1,4 +1,4 @@
-(defproject events-pipes "0.11.0"
+(defproject events-pipes "0.11.1"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -29,7 +29,8 @@
                  [ring-cors "0.1.7"]]
 
   :plugins [[lein-cljsbuild "1.0.5"]
-            [lein-figwheel "0.3.5"]]
+            [lein-figwheel "0.3.5"]
+            [michaelblume/lein-marginalia "0.9.0"]]
 
   :main ^:skip-aot events-pipes.server
   
