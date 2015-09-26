@@ -1,10 +1,14 @@
+;; This namespace deals with starting and shutting down the whole system
+;; It will also start an nrepl server, so we can connect from outside to add
+;; taps
 (ns events-pipes.server.main
   (:require [events-pipes.server.core :as core]
             [events-pipes.server.web-server :as web-server]
             [events-pipes.server.udp-server :as udp-server]
             [cider.nrepl :refer [cider-nrepl-handler]]
             [com.stuartsierra.component :as comp]
-            [clojure.tools.nrepl.server :as nrepl]))
+            [clojure.tools.nrepl.server :as nrepl])
+  (:gen-class))
 
 (def server-system nil)
 (def nrepl-server nil)
@@ -47,6 +51,6 @@
   (core/load-taps (:taps server-system) taps-file)
   (web-server/notify-taps-change (:taps server-system) (-> server-system :web-server :sente-ch-socket))
 
-  (println "Receiving events on POST to http://this-box:7777/event or UDP datagram on 7777") 
-  (println "Done! Point your browser to http://this-box:7777/index.html")
+  (println (format "Receiving events on POST to http://this-box:%s/event or UDP datagram on %s" port port)) 
+  (println (format "Done! Point your browser to http://this-box:%s/index.html" port))
   (println "You also have an nrepl server at 7778"))

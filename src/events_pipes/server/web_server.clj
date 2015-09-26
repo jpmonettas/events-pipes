@@ -1,3 +1,10 @@
+;; This namespace deals with :
+
+;; - Running a web server for
+;;   - exposing an api for publishing events via POST
+;;   - exposing a web socket for recieving events
+;; - Running a process tu push every recieved event thru Taps
+;; - Routing events recieved thru the web socket
 (ns events-pipes.server.web-server
   (:require [events-pipes.server.core :as core]
             [clojure.walk :refer [keywordize-keys]]
@@ -14,8 +21,9 @@
             [ring.middleware.keyword-params :refer [wrap-keyword-params]]
             [ring.middleware.params :refer [wrap-params]]))
 
+
 (defn wrap-components
-  "Inject all components in the request"
+  "Inject all components in the request, so we can do it without global defs"
   [handler taps sente-ch-socket]
   (fn [request]
     (let [injected-request (-> request
@@ -23,13 +31,13 @@
       (handler injected-request))))
 
 (defn wrap-sente-ch-socket
-  "Inject sente-ch-socket in the request"
+  "Inject sente-ch-socket in the request , so we can do it without global defs"
   [handler sente-ch-socket]
   (fn [request]
     (let [injected-request (assoc request :sente-ch-socket sente-ch-socket)]
       (handler injected-request))))
 
-
+;; API for publishing events
 (defroutes api-routes-handler
   (POST "/event" req {:status 200
                       :body {:success true
@@ -37,6 +45,7 @@
                                                          (:remote-addr req)
                                                          (-> req keywordize-keys :body))}} ))
 
+;; Web socket
 (defroutes sente-routes-handler
   (GET  "/chsk" req (let [ring-ajax-get-or-ws-handshake (-> req :sente-ch-socket :ajax-get-or-ws-handshake-fn)]
                       (ring-ajax-get-or-ws-handshake req)))
@@ -58,18 +67,26 @@
       (wrap-components taps sente-ch-socket))
    (cr/resources "/")))
 
-(defn notify-taps-change [taps {:keys [send-fn]}]
+(defn notify-taps-change
+  "Send taps status thru the web sockets, so monitors can update their UI
+  if something changes.
+  It will send [:taps/refreshed {:id :name :muted}]"
+  [taps {:keys [send-fn]}]
   (send-fn  :sente/all-users-without-uid
             [:taps/refreshed (map #(select-keys % [:id :name :muted?])
                                   (vals @(:branches taps)))]))
 
+;; Every recieved event will have taps, socket and event type and data
+;; We will dispatch on event type
 (defmulti event-msg-handler (fn [_ _ [ev-type ev-data]] ev-type))
 
+;; Toggle the tap on/off
 (defmethod event-msg-handler :taps/tap-toggled
   [taps sente-ch-socket [_ tap-id]]
   (core/toggle-mix taps tap-id)
   (notify-taps-change taps sente-ch-socket))
 
+;; Web socket is asking for taps info refresh
 (defmethod event-msg-handler :taps/please-refresh
   [taps sente-ch-socket _]
   (notify-taps-change taps sente-ch-socket))
@@ -79,6 +96,11 @@
 (defn event-msg-handler* [taps sente-ch-socket {:keys [id ?data event]}]
   (event-msg-handler taps sente-ch-socket event))
 
+;; The web server component is responsible for starting and shooting down :
+
+;; - A web server
+;; - A process that will inject every recieved event thru the taps tree
+;; - A router that will route incomming messages from the web socket
 (defrecord WebServer [server router taps port sente-ch-socket]
   
   comp/Lifecycle
@@ -91,10 +113,13 @@
           output-channel (:output-ch taps)
           server (http-server/run-server (create-web-server-handler taps sente-ch-socket)
                                          {:port port :join? false})]
-      
+
+      ;; If the channel gets closed the proccess will end
       (go-loop []
-        (send-fn! :sente/all-users-without-uid [:general/reporting (<! output-channel)])
-        (recur))
+        (let [ev (<! output-channel)]
+          (send-fn! :sente/all-users-without-uid [:general/reporting ev])
+          (when ev (recur))))
+      
       (-> this
          (assoc :server server)
          (assoc :sente-ch-socket sente-ch-socket)
@@ -102,7 +127,8 @@
   
   (stop [this]
     (println "Stoping WebServer component...")
-    (.stop server)
+    ;; Stop the server by just calling the funciton
+    (server)
     ;; Stop the router by just calling the function
     (router)
     ;; TODO We need a way to stop the go-loop process
