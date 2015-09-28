@@ -2866,80 +2866,145 @@ net.brehaut.ClojureTools = (function (SH) {
   };
 })(SyntaxHighlighter);
 </script><title>events-pipes -- Marginalia</title></head><body><table><tr><td class="docs"><div class="header"><h1 class="project-name">events-pipes</h1><h2 class="project-version">0.12.0</h2><br /><p>Event processing server and monitor</p>
-</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.7.0</td></tr><tr><td class="dep-name">org.clojure/clojurescript</td><td class="dotted"><hr /></td><td class="dep-version">0.0-3297</td></tr><tr><td class="dep-name">org.clojure/core.async</td><td class="dotted"><hr /></td><td class="dep-version">0.1.346.0-17112a-alpha</td></tr><tr><td class="dep-name">cljsjs/highlight</td><td class="dotted"><hr /></td><td class="dep-version">8.4-0</td></tr><tr><td class="dep-name">http-kit</td><td class="dotted"><hr /></td><td class="dep-version">2.1.18</td></tr><tr><td class="dep-name">reagent</td><td class="dotted"><hr /></td><td class="dep-version">0.5.0</td></tr><tr><td class="dep-name">com.andrewmcveigh/cljs-time</td><td class="dotted"><hr /></td><td class="dep-version">0.3.10</td></tr><tr><td class="dep-name">com.taoensso/sente</td><td class="dotted"><hr /></td><td class="dep-version">1.5.0</td></tr><tr><td class="dep-name">compojure</td><td class="dotted"><hr /></td><td class="dep-version">1.4.0</td></tr><tr><td class="dep-name">ring/ring-json</td><td class="dotted"><hr /></td><td class="dep-version">0.3.1</td></tr><tr><td class="dep-name">org.clojure/tools.nrepl</td><td class="dotted"><hr /></td><td class="dep-version">0.2.7</td></tr><tr><td class="dep-name">cider/cider-nrepl</td><td class="dotted"><hr /></td><td class="dep-version">0.10.0-SNAPSHOT</td></tr><tr><td class="dep-name">cljsjs/d3</td><td class="dotted"><hr /></td><td class="dep-version">3.5.5-3</td></tr><tr><td class="dep-name">aleph</td><td class="dotted"><hr /></td><td class="dep-version">0.4.0</td></tr><tr><td class="dep-name">manifold</td><td class="dotted"><hr /></td><td class="dep-version">0.1.0</td></tr><tr><td class="dep-name">amalloy/ring-buffer</td><td class="dotted"><hr /></td><td class="dep-version">1.2</td></tr><tr><td class="dep-name">byte-streams</td><td class="dotted"><hr /></td><td class="dep-version">0.2.0</td></tr><tr><td class="dep-name">clj-json</td><td class="dotted"><hr /></td><td class="dep-version">0.5.3</td></tr><tr><td class="dep-name">ring-cors</td><td class="dotted"><hr /></td><td class="dep-version">0.1.7</td></tr><tr><td class="dep-name">com.stuartsierra/component</td><td class="dotted"><hr /></td><td class="dep-version">0.3.0</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#events-pipes.client">events-pipes.client</a></li><li><a href="#events-pipes.server.web-server">events-pipes.server.web-server</a></li><li><a href="#events-pipes.server.repl-api">events-pipes.server.repl-api</a></li><li><a href="#events-pipes.server.main">events-pipes.server.main</a></li><li><a href="#events-pipes.server.udp-server">events-pipes.server.udp-server</a></li><li><a href="#events-pipes.server.core">events-pipes.server.core</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#events-pipes.client" name="events-pipes.client"><h1 class="project-name">events-pipes.client</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(ns ^:figwheel-always events-pipes.client
-    (:require-macros
-     [cljs.core.async.macros :as asyncm :refer (go go-loop)])
-    (:require [reagent.core :as reagent :refer [atom]]
-              [cljs.core.async :as async :refer (&lt;! &gt;! put! chan timeout)]
-              [clojure.string :as str]
+</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.7.0</td></tr><tr><td class="dep-name">org.clojure/clojurescript</td><td class="dotted"><hr /></td><td class="dep-version">1.7.48</td></tr><tr><td class="dep-name">org.clojure/core.async</td><td class="dotted"><hr /></td><td class="dep-version">0.1.346.0-17112a-alpha</td></tr><tr><td class="dep-name">cljsjs/highlight</td><td class="dotted"><hr /></td><td class="dep-version">8.4-0</td></tr><tr><td class="dep-name">http-kit</td><td class="dotted"><hr /></td><td class="dep-version">2.1.18</td></tr><tr><td class="dep-name">reagent</td><td class="dotted"><hr /></td><td class="dep-version">0.5.0</td></tr><tr><td class="dep-name">com.andrewmcveigh/cljs-time</td><td class="dotted"><hr /></td><td class="dep-version">0.3.10</td></tr><tr><td class="dep-name">com.taoensso/sente</td><td class="dotted"><hr /></td><td class="dep-version">1.5.0</td></tr><tr><td class="dep-name">compojure</td><td class="dotted"><hr /></td><td class="dep-version">1.4.0</td></tr><tr><td class="dep-name">ring/ring-json</td><td class="dotted"><hr /></td><td class="dep-version">0.3.1</td></tr><tr><td class="dep-name">org.clojure/tools.nrepl</td><td class="dotted"><hr /></td><td class="dep-version">0.2.7</td></tr><tr><td class="dep-name">cider/cider-nrepl</td><td class="dotted"><hr /></td><td class="dep-version">0.10.0-SNAPSHOT</td></tr><tr><td class="dep-name">cljsjs/d3</td><td class="dotted"><hr /></td><td class="dep-version">3.5.5-3</td></tr><tr><td class="dep-name">aleph</td><td class="dotted"><hr /></td><td class="dep-version">0.4.0</td></tr><tr><td class="dep-name">manifold</td><td class="dotted"><hr /></td><td class="dep-version">0.1.0</td></tr><tr><td class="dep-name">amalloy/ring-buffer</td><td class="dotted"><hr /></td><td class="dep-version">1.2</td></tr><tr><td class="dep-name">byte-streams</td><td class="dotted"><hr /></td><td class="dep-version">0.2.0</td></tr><tr><td class="dep-name">clj-json</td><td class="dotted"><hr /></td><td class="dep-version">0.5.3</td></tr><tr><td class="dep-name">ring-cors</td><td class="dotted"><hr /></td><td class="dep-version">0.1.7</td></tr><tr><td class="dep-name">com.stuartsierra/component</td><td class="dotted"><hr /></td><td class="dep-version">0.3.0</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#events-pipes.client.core">events-pipes.client.core</a></li><li><a href="#events-pipes.client.ui">events-pipes.client.ui</a></li><li><a href="#events-pipes.server.web-server">events-pipes.server.web-server</a></li><li><a href="#events-pipes.server.repl-api">events-pipes.server.repl-api</a></li><li><a href="#events-pipes.server.main">events-pipes.server.main</a></li><li><a href="#events-pipes.server.udp-server">events-pipes.server.udp-server</a></li><li><a href="#events-pipes.server.core">events-pipes.server.core</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#events-pipes.client.core" name="events-pipes.client.core"><h1 class="project-name">events-pipes.client.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(ns ^:figwheel-always events-pipes.client.core
+    (:require-macros [cljs.core.async.macros :as asyncm :refer (go go-loop)])
+    (:require [clojure.string :as str]
+              [reagent.core :as reagent]
               [taoensso.sente  :as sente :refer (cb-success?)]
               [clojure.set :as set]
-              [cljs-time.format :as tf]
-              [cljs-time.coerce :as tc]
-              [cljsjs.highlight]
-              [cljsjs.d3] 
-              [cljsjs.highlight.langs.clojure]
               [cljs.pprint :refer [pprint]]
-              [amalloy.ring-buffer :refer [ring-buffer]]))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(enable-console-print!)</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defonce app-state (atom {:state nil
-                          :taps []
-                          :ev-pattern #&quot;.*&quot;
-                          :modal-open? false
-                          :taps-panel-open? true
-                          :chsk nil
-                          :selected nil
-                          :selected-tab &quot;/input&quot;
-                          :role-colors {}
-                          :events {}}))</pre></td></tr><tr><td class="docs"><p>Incomming channel messages router ;;</p>
-</td><td class="codes"></td></tr><tr><td class="docs">
+              [cljs.core.async :as async :refer (&lt;! &gt;! put! chan timeout)]
+              [amalloy.ring-buffer :refer [ring-buffer]]))</pre></td></tr><tr><td class="docs"><p>So we can use (println) and it ends up in the js/console</p>
+</td><td class="codes"><pre class="brush: clojure">(enable-console-print!)</pre></td></tr><tr><td class="docs"><h1>Application state</h1>
+
+<p>We are keeping all the app state in this atom</p>
+</td><td class="codes"><pre class="brush: clojure">(defonce app-state (reagent/atom {:state nil
+                                  :taps []
+                                  :ev-pattern #&quot;.*&quot;
+                                  :modal-open? false
+                                  :taps-panel-open? true
+                                  :chsk nil
+                                  :selected nil
+                                  :selected-tab &quot;/input&quot;
+                                  :role-colors {}
+                                  :events {}}))</pre></td></tr><tr><td class="docs"><p>Incomming channel messages router </p>
 </td><td class="codes"><pre class="brush: clojure">(defonce router_ (atom nil))</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(declare event-msg-handler*)</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defn  stop-router! [] 
   (when-let [stop-f @router_] (stop-f)))</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defn start-router! [ch] 
   (stop-router!)
-  (reset! router_ (sente/start-chsk-router! ch event-msg-handler*)))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn on-js-reload [])</pre></td></tr><tr><td class="docs"><p>UI ;;</p>
-</td><td class="codes"></td></tr><tr><td class="docs"><h2>User events handling</h2>
-</td><td class="codes"><pre class="brush: clojure">(defn select-event [ev]
-  (swap! app-state (fn [s] (-&gt; s
-                               (assoc :selected ev)
-                               (assoc :modal-open? true)))))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn close-modal []
-  (swap! app-state assoc :modal-open? false))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn toggle-tap [tap-id]
-  (let [chsk-send! (:send-fn @app-state)]
-    (chsk-send! [:taps/tap-toggled tap-id])))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn connect [server]
+  (reset! router_ (sente/start-chsk-router! ch event-msg-handler*)))</pre></td></tr><tr><td class="docs"><p>Connect to server web socket and start the router</p>
+</td><td class="codes"><pre class="brush: clojure">(defn connect
+  [server]
   (let [{:keys [chsk ch-recv send-fn state]}
         (sente/make-channel-socket! &quot;/chsk&quot; ; Note the same path as before
                                     {:type :ws ; e/o #{:auto :ajax :ws}
                                      :chsk-url-fn (constantly (str &quot;ws://&quot; server &quot;/chsk&quot;))})]
     (stop-router!)
     (swap! app-state #(-&gt; %
-                          (assoc :state state)
-                          (assoc :send-fn send-fn)))
+                         (assoc :state state)
+                         (assoc :send-fn send-fn)))
     (start-router! ch-recv)
     ;; Wait some time for the channels to connect, then ask for a refresh
     (go (&lt;! (timeout 2000))
-        (send-fn [:taps/please-refresh]))))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn clear-events []
-  (swap! app-state merge {:selected 0 :role-colors {} :events {}}))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn toggle-taps-panel []
-  (swap! app-state update-in [:taps-panel-open?] #(not %))) </pre></td></tr><tr><td class="docs"><h2>Components</h2>
+        (send-fn [:taps/please-refresh]))))</pre></td></tr><tr><td class="docs"><p>Given a state and an event, choose a color for the event and add it to the state.
+  We keep track of already choosed colors so we can assign a new color to each new role.</p>
+</td><td class="codes"><pre class="brush: clojure">(defn add-colored-event
+  [state {:keys [event-id tap-id timestamp role remote-addr sumary detail] :as ev}]
+  (let [colors #{&quot;#028482&quot; &quot;#7ABA7A&quot; &quot;#B76EB8&quot; &quot;#6BCAE2&quot; &quot;#51A5BA&quot; &quot;#41924B&quot; &quot;#AFEAAA&quot; &quot;#87E293&quot; &quot;#FE8402&quot;}
+        role-colors (:role-colors state)
+        color (or (get role-colors role)
+                 (first (set/difference colors (into #{} (vals role-colors))))
+                 &quot;black&quot;)]
+    (-&gt; state
+       (update-in [:events tap-id] (fn [tap-evs]
+                                     (conj (or tap-evs (ring-buffer 1000))
+                                           (assoc ev :color color)))) 
+       (assoc-in [:role-colors role]  color))))</pre></td></tr><tr><td class="docs"><p>Given a taps vector return a taps tree using taps id to figure out hierarchy</p>
+</td><td class="codes"><pre class="brush: clojure">(defn taps-tree
+  [taps]
+  (let [taps-tr (reduce (fn [tree tap]
+                          (let [path (vec (drop 2 (str/split (:id tap) #&quot;/&quot;)))]
+                            (assoc-in tree (conj path :data)  tap)))
+                        {}
+                        taps)
+        make-tree (fn make-tree [tr]
+                    (let [childs (map second (filter (comp string? first) tr))
+                          data (second (first (filter (comp keyword? first) tr)))]
+                      (if-not (empty? childs)
+                        (assoc data :children (mapv make-tree childs))
+                        data)))]
+    (make-tree (vec taps-tr)))) </pre></td></tr><tr><td class="docs"><h1>Incomming events handling</h1>
+
+<p>Here we handle all the events that are comming from the server</p>
+</td><td class="codes"></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defmulti event-msg-handler (fn [[ev-type ev-data]] ev-type))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defmethod event-msg-handler :general/reporting
+  [[_ ev-data]]
+  (swap! app-state add-colored-event ev-data))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defmethod event-msg-handler :taps/refreshed
+  [[_ new-taps]]
+  (swap! app-state assoc :taps new-taps))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defmethod event-msg-handler :default
+  [e]
+  (println &quot;Don't know how to handle &quot; e))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defn event-msg-handler* [{:keys [id ?data event]}]
+  (println &quot;EVENT! &quot; event)
+  (when (= id :chsk/recv)
+    (event-msg-handler (second event))
+    (let [[ev-type ev-data] (second event)])))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#events-pipes.client.ui" name="events-pipes.client.ui"><h1 class="project-name">events-pipes.client.ui</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>This namespace implements all monior ui functionality
+From rendering the react components thru managing the user events</p>
+</td><td class="codes"><pre class="brush: clojure">(ns ^:figwheel-always events-pipes.client.ui
+  (:require-macros [cljs.core.async.macros :as asyncm :refer (go go-loop)])
+  (:require [reagent.core :as reagent :refer [atom]]
+            [cljs.core.async :as async :refer (&lt;! &gt;! put! chan timeout)]
+            [cljs-time.format :as tf]
+            [cljs-time.coerce :as tc]
+            [cljsjs.highlight]
+            [cljsjs.d3] 
+            [cljsjs.highlight.langs.clojure]
+            [events-pipes.client.core :as core]
+            [cljs.pprint :refer [pprint]]))</pre></td></tr><tr><td class="docs"><h1>User events handling</h1>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>User clicked an event line</p>
+</td><td class="codes"><pre class="brush: clojure">(defn select-event
+  [ev]
+  (swap! core/app-state (fn [s] (-&gt; s
+                               (assoc :selected ev)
+                               (assoc :modal-open? true)))))</pre></td></tr><tr><td class="docs"><p>User wants to close the detail modal</p>
+</td><td class="codes"><pre class="brush: clojure">(defn close-modal
+  []
+  (swap! core/app-state assoc :modal-open? false))</pre></td></tr><tr><td class="docs"><p>User clicked on a tree tap to toggle it on/off</p>
+</td><td class="codes"><pre class="brush: clojure">(defn toggle-tap
+  [tap-id]
+  (let [chsk-send! (:send-fn @core/app-state)]
+    (chsk-send! [:taps/tap-toggled tap-id])))</pre></td></tr><tr><td class="docs"><p>User clicked the connect button</p>
+</td><td class="codes"><pre class="brush: clojure">(defn connect
+  [server]
+  (core/connect server))</pre></td></tr><tr><td class="docs"><p>User clicked the clear events button</p>
+</td><td class="codes"><pre class="brush: clojure">(defn clear-events
+  []
+  (swap! core/app-state merge {:selected 0 :role-colors {} :events {}}))</pre></td></tr><tr><td class="docs"><p>User clicked the arrow to toggle show/hide the pas panel</p>
+</td><td class="codes"><pre class="brush: clojure">(defn toggle-taps-panel
+  []
+  (swap! core/app-state update-in [:taps-panel-open?] #(not %))) </pre></td></tr><tr><td class="docs"><p>User changed the content of the search box</p>
+</td><td class="codes"><pre class="brush: clojure">(defn search-changed
+  [e]
+  (let [text (-&gt; e .-target .-value)]
+    (swap! core/app-state assoc :ev-pattern (re-pattern (str &quot;.*&quot; text &quot;.*&quot;)))))</pre></td></tr><tr><td class="docs"><h1>React components</h1>
+</td><td class="codes"></td></tr><tr><td class="docs"><p>React component for rendering the event detail with code higlight</p>
 </td><td class="codes"><pre class="brush: clojure">(def selected-event
   (with-meta
     (fn [{:keys [summary detail] :as ev}]
       [:code {:class &quot;clojure&quot;} (with-out-str (pprint detail))])
+    ;; In reagent we can hook on react lifecycle with component metadata
+    ;; After component mounts we execute the highlightBlock function
     {:component-did-mount
-                     (fn [this old-props old-childs]
-                       (.highlightBlock js/hljs (reagent/dom-node this)))})) </pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn search-changed [e]
-  (let [text (-&gt; e .-target .-value)]
-    (swap! app-state assoc :ev-pattern (re-pattern (str &quot;.*&quot; text &quot;.*&quot;)))))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn header [connected]
+     (fn [this old-props old-childs]
+       (.highlightBlock js/hljs (reagent/dom-node this)))})) </pre></td></tr><tr><td class="docs"><p>React component for header of the UI with the connect box</p>
+</td><td class="codes"><pre class="brush: clojure">(defn header
+  [connected]
   (let [server-address (atom &quot;localhost:7777&quot;)]
     (fn [props]
       [:div.form-inline.server-container 
@@ -2953,14 +3018,15 @@ net.brehaut.ClojureTools = (function (SH) {
        [:div.input-group.search
         [:span.glyphicon.glyphicon-search.input-group-addon]
         [:input.search.form-control {:type :text
-                                     :on-change #(search-changed %)}]]])))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn events []
+                                     :on-change #(search-changed %)}]]])))</pre></td></tr><tr><td class="docs"><p>React component for events. Draws a tabs panel each with it's events</p>
+</td><td class="codes"><pre class="brush: clojure">(defn events
+  []
   [:div#events
    [:ul.nav.nav-tabs
-    (doall (for [t (keys (:events @app-state))]
+    (doall (for [t (keys (:events @core/app-state))]
              [:li (merge
-                   {:on-click #(swap! app-state assoc :selected-tab t)}
-                   (when (= (:selected-tab @app-state) t) {:class :active})) [:a t]]))]
+                   {:on-click #(swap! core/app-state assoc :selected-tab t)}
+                   (when (= (:selected-tab @core/app-state) t) {:class :active})) [:a t]]))]
     [:div.tab-content
      [:ul (doall
            (map-indexed
@@ -2971,60 +3037,43 @@ net.brehaut.ClojureTools = (function (SH) {
                                                                                (tc/from-long (.getTime timestamp)))] 
                [:span.ip {:style {:background-color color}} remote-addr]
                [:span.role {:style {:background-color color}} role]
-               [:span.content {:style {:background-color color}} (when detail [:span.glyphicon.glyphicon-fullscreen]) (str summary)]])  
-            (filter #(re-matches (:ev-pattern @app-state) (apply str %))
-                    (get-in @app-state [:events (:selected-tab @app-state)]))))]]])</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn taps-panel []
-  [:div#taps-panel {:class (when (:taps-panel-open? @app-state)
+               [:span.content {:style {:background-color color}} (when detail [:span.glyphicon.glyphicon-fullscreen]) (str summary)]])
+            ;; every time we are going to render the events filter only the ones that matches
+            ;; the regexp in the search box
+            (filter #(re-matches (:ev-pattern @core/app-state) (apply str %))
+                    (get-in @core/app-state [:events (:selected-tab @core/app-state)]))))]]])</pre></td></tr><tr><td class="docs"><p>React component. Draws the taps panel where we draw the tree</p>
+</td><td class="codes"><pre class="brush: clojure">(defn taps-panel
+  []
+  [:div#taps-panel {:class (when (:taps-panel-open? @core/app-state)
                              &quot;taps-panel-open&quot;)}
-   [:span.glyphicon {:class (if (:taps-panel-open? @app-state)
+   [:span.glyphicon {:class (if (:taps-panel-open? @core/app-state)
                               &quot;glyphicon-menu-left&quot;
                               &quot;glyphicon-menu-right&quot;)
-                     :on-click toggle-taps-panel} ]
-   [:div#taps-tree]]) </pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn ui []
+                     :on-click toggle-taps-panel} &quot;&quot;]
+   ;; We are not rendering this with react, since we are doing this
+   ;; with D3 library
+   [:div#taps-tree]]) </pre></td></tr><tr><td class="docs"><p>React component. Main UI component</p>
+</td><td class="codes"><pre class="brush: clojure">(defn ui
+  []
   [:div 
    [:div#header
     [header]
     [taps-panel]
-    (when (:modal-open? @app-state)
-      (let [ev (:selected @app-state)]
-          [:div.last-event {:on-click #(when (:modal-open? @app-state) (close-modal))}
+    (when (:modal-open? @core/app-state)
+      (let [ev (:selected @core/app-state)]
+          [:div.last-event {:on-click #(when (:modal-open? @core/app-state) (close-modal))}
            [:div.summary (:summary ev)]
            (when (:detail ev)
              [:pre.code 
               [selected-event ev]])]))]
    [events]])  </pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(reagent/render-component [ui]
-                          (. js/document (getElementById &quot;app&quot;))) </pre></td></tr><tr><td class="docs"><p>Incomming events handling  ;;</p>
-</td><td class="codes"></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn add-colored-event [state {:keys [event-id tap-id timestamp role remote-addr sumary detail] :as ev}]
-  (let [colors #{&quot;#028482&quot; &quot;#7ABA7A&quot; &quot;#B76EB8&quot; &quot;#6BCAE2&quot; &quot;#51A5BA&quot; &quot;#41924B&quot; &quot;#AFEAAA&quot; &quot;#87E293&quot; &quot;#FE8402&quot;}
-        role-colors (:role-colors state)
-        color (or (get role-colors role)
-                  (first (set/difference colors (into #{} (vals role-colors))))
-                  &quot;black&quot;)]
-    (-&gt; state
-        (update-in [:events tap-id] (fn [tap-evs]
-                                      (conj (or tap-evs (ring-buffer 1000))
-                                            (assoc ev :color color)))) 
-        (assoc-in [:role-colors role]  color))))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn taps-tree [taps]
-  (let [taps-tr (reduce (fn [tree tap]
-                          (let [path (vec (drop 2 (str/split (:id tap) #&quot;/&quot;)))]
-                            (assoc-in tree (conj path :data)  tap)))
-                        {}
-                        taps)
-        make-tree (fn make-tree [tr]
-                    (let [childs (map second (filter (comp string? first) tr))
-                          data (second (first (filter (comp keyword? first) tr)))]
-                      (if-not (empty? childs)
-                        (assoc data :children (mapv make-tree childs))
-                        data)))]
-    (make-tree (vec taps-tr)))) </pre></td></tr><tr><td class="docs"><p>Crazy stuff to draw the tree using d3 ;;</p>
+                          (. js/document (getElementById &quot;app&quot;))) </pre></td></tr><tr><td class="docs"><h2>Tree drawing</h2>
+
+<p>Crazy stuff to draw the tree using d3 
+<em>* Important *</em> from here on we are outside react</p>
 </td><td class="codes"></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defn draw-taps-tree [taps-tr]
-  (set! (.-innerHTML (.getElementById js/document &quot;taps-tree&quot;)) )
   (let [margin {:top 20 :right 120 :bottom 20 :left 120}
         width (- 960 (:right margin) (:left margin))
         height (- 500 (:top margin) (:bottom margin))
@@ -3075,31 +3124,22 @@ net.brehaut.ClojureTools = (function (SH) {
         (.attr &quot;x&quot; 13)
         (.attr &quot;dy&quot; &quot;.35em&quot;) 
         (.attr &quot;text-anchor&quot; &quot;start&quot;)
-        (.text (fn [d] (.-name d)))
+        (.text (fn [d] (.-name d))) 
         (.style &quot;fill-opacity&quot; 1))
     (-&gt; (.enter link)
         (.insert &quot;path&quot; &quot;g&quot;)
         (.attr &quot;class&quot; &quot;link&quot;)
-        (.attr &quot;d&quot; diagonal))))</pre></td></tr><tr><td class="docs"><p>Endo of Crazy stuff to draw the tree using d3 ;;</p>
+        (.attr &quot;d&quot; diagonal))))</pre></td></tr><tr><td class="docs"><p>To make it feel like react we are watching the state
+and if something changes repain the whole tree</p>
 </td><td class="codes"></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defmulti event-msg-handler (fn [[ev-type ev-data]] ev-type))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defmethod event-msg-handler :general/reporting
-  [[_ ev-data]]
-  (swap! app-state add-colored-event ev-data))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defmethod event-msg-handler :taps/refreshed
-  [[_ new-taps]]
-  (swap! app-state assoc :taps new-taps)
-  (draw-taps-tree (-&gt; (:taps @app-state)
-                      taps-tree
-                      clj-&gt;js)))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defmethod event-msg-handler :default
-  [e]
-  (println &quot;Don't know how to handle &quot; e))</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn event-msg-handler* [{:keys [id ?data event]}]
-  (println &quot;EVENT! &quot; event)
-  (when (= id :chsk/recv)
-    (event-msg-handler (second event))
-    (let [[ev-type ev-data] (second event)])))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#events-pipes.server.web-server" name="events-pipes.server.web-server"><h1 class="project-name">events-pipes.server.web-server</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>This namespace deals with :</p>
+</td><td class="codes"><pre class="brush: clojure">(add-watch core/app-state :taps-watcher
+           (fn [_ _ {old-taps :taps} {new-taps :taps}]
+             (when (and (not (= old-taps new-taps))
+                        (not (empty? new-taps)))
+               (set! (.-innerHTML (.getElementById js/document &quot;taps-tree&quot;)) &quot;&quot;)
+               (draw-taps-tree (-&gt; new-taps
+                                  core/taps-tree
+                                  clj-&gt;js)))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#events-pipes.server.web-server" name="events-pipes.server.web-server"><h1 class="project-name">events-pipes.server.web-server</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>This namespace deals with :</p>
 </td><td class="codes"></td></tr><tr><td class="docs"><ul>
 <li>Running a web server for
 <ul><li>exposing an api for publishing events via POST</li>
@@ -3202,7 +3242,8 @@ We will dispatch on event type</p>
          (assoc :router (sente/start-chsk-router! ch-recv (partial event-msg-handler* taps sente-ch-socket))))))
   (stop [this]
     (println &quot;Stoping WebServer component...&quot;)
-    (.stop server)
+    ;; Stop the server by just calling the funciton
+    (server)
     ;; Stop the router by just calling the function
     (router)
     ;; TODO We need a way to stop the go-loop process
@@ -3453,7 +3494,7 @@ garbage collected</p>
        (dissoc :input-ch)
        (dissoc :output-ch)
        (dissoc :output-mix)
-       (dissoc :branches))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_events-pipes.client">events-pipes.client</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.web-server">events-pipes.server.web-server</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.repl-api">events-pipes.server.repl-api</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.main">events-pipes.server.main</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.udp-server">events-pipes.server.udp-server</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.core">events-pipes.server.core</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
+       (dissoc :branches))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_events-pipes.client.core">events-pipes.client.core</li><li class="floating-toc-li" id="floating-toc_events-pipes.client.ui">events-pipes.client.ui</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.web-server">events-pipes.server.web-server</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.repl-api">events-pipes.server.repl-api</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.main">events-pipes.server.main</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.udp-server">events-pipes.server.udp-server</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.core">events-pipes.server.core</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
 SyntaxHighlighter.all();
 
 // hackity hack

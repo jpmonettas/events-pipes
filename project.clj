@@ -5,7 +5,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "0.0-3297"]
+                 [org.clojure/clojurescript "1.7.48"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [cljsjs/highlight "8.4-0"]
                  [http-kit "2.1.18"]
@@ -29,8 +29,8 @@
                  [ring-cors "0.1.7"]
                  [com.stuartsierra/component "0.3.0"]]
 
-  :plugins [[lein-cljsbuild "1.0.5"]
-            [lein-figwheel "0.3.5"]
+  :plugins [[lein-cljsbuild "1.1.0"]
+            [lein-figwheel "0.4.0"]
             [michaelblume/lein-marginalia "0.9.0"]]
 
   :main ^:skip-aot events-pipes.server.main
@@ -39,25 +39,19 @@
 
   ;; This is commented out because it's breaking the uberjar (not including the js)
   ;; try rm resources/public/js/compiled -rf, the cljsbuild once, and then uberjar
-  ;;:clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
     :builds [{:id "dev"
               :source-paths ["src"]
+              :figwheel true
+              ;;:figwheel { :on-jsload "events-pipes.client/on-js-reload" }
 
-              :figwheel { :on-jsload "events-pipes.client/on-js-reload" }
-
-              :compiler {:main events-pipes.client
+              :compiler {:main events-pipes.client.ui
                          :asset-path "js/compiled/out"
                          :output-to "resources/public/js/compiled/events_pipes.js"
                          :output-dir "resources/public/js/compiled/out"
-                         :source-map-timestamp true }}
-             {:id "min"
-              :source-paths ["src"]
-              :compiler {:output-to "resources/public/js/compiled/events_pipes.js"
-                         :main events-pipes.client
-                         :optimizations :advanced
-                         :pretty-print false}}]}
+                         :source-map-timestamp true }}]}
 
   :figwheel {
              ;; :http-server-root "public" ;; default and assumes "resources" 
