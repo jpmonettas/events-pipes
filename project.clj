@@ -1,4 +1,4 @@
-(defproject events-pipes "0.12.0"
+(defproject events-pipes "0.12.1"
   :description "Event processing server and monitor"
   :url ""
   :license {:name "Eclipse Public License"
@@ -15,6 +15,8 @@
                  [compojure "1.4.0"]
                  [ring/ring-json "0.3.1"]
 
+                 [clojurewerkz/elastisch "2.1.0"]
+                 
                  ;; To embeed a nrepl server in the app
                  [org.clojure/tools.nrepl "0.2.7"]
                  [cider/cider-nrepl "0.10.0-SNAPSHOT"]
@@ -39,19 +41,18 @@
 
   ;; This is commented out because it's breaking the uberjar (not including the js)
   ;; try rm resources/public/js/compiled -rf, the cljsbuild once, and then uberjar
-  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+  ;;:clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
     :builds [{:id "dev"
               :source-paths ["src"]
-              :figwheel true
-              ;;:figwheel { :on-jsload "events-pipes.client/on-js-reload" }
-
+              :figwheel false
               :compiler {:main events-pipes.client.ui
                          :asset-path "js/compiled/out"
                          :output-to "resources/public/js/compiled/events_pipes.js"
                          :output-dir "resources/public/js/compiled/out"
-                         :source-map-timestamp true }}]}
+                         :source-map-timestamp true }}
+             ]}
 
   :figwheel {
              ;; :http-server-root "public" ;; default and assumes "resources" 

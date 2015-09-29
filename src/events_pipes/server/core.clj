@@ -72,17 +72,22 @@
 
 (defn post-event!
   "Adds an event thru the input-ch of taps.
-  An event is a map with `:event-id` `:remote-addr` `:timestamp` `:role` `:summary` `:detail` `:thread-id`"
+  An event is a map with `:event-id` `:remote-addr` `:timestamp` `:role` `:summary` `:detail` `:thread-id` `:tags`"
   
-  [taps remote-addr {:keys [role summary detail thread-id]}]
-  (let [event-id (str (java.util.UUID/randomUUID))]
-    (>!! (:input-ch taps) {:event-id event-id
-                           :remote-addr (normalize-localhost-ip remote-addr)
-                           :timestamp (Date.)
-                           :role role
-                           :thread-id thread-id
-                           :summary summary
-                           :detail detail}) 
+  [taps remote-addr {:keys [role summary detail thread-id tags]}]
+  (let [event-id (str (java.util.UUID/randomUUID))
+        ev {:event-id event-id
+            :remote-addr (normalize-localhost-ip remote-addr)
+            :timestamp (Date.)
+            :role role
+            :thread-id thread-id
+            :summary summary
+            :tags tags
+            :detail detail}]
+
+    ;; post every event on the input channel and the persistence ch
+    (>!! (:input-ch taps) ev) 
+    (>!! (:db-ch taps) ev) 
     event-id))
 
 
@@ -113,7 +118,7 @@
 ;; **Stopping taps component** is about removing all references so everything can be
 ;; garbage collected
 
-(defrecord Taps [input-ch output-ch output-mix branches]
+(defrecord Taps [input-ch output-ch output-mix branches db-ch]
 
   comp/Lifecycle
 
@@ -121,6 +126,7 @@
     (println "Starting Taps component...")
     (let [input-ch (chan (sliding-buffer taps-buffer-size) (map #(assoc % :tap-id "/input")))
           output-ch (chan (sliding-buffer taps-buffer-size))
+          db-channel (chan (sliding-buffer taps-buffer-size)) 
           input-mult (mult input-ch)
           output-mix (mix output-ch)
           input-tap (tap input-mult (chan (sliding-buffer 10)))
@@ -128,6 +134,7 @@
                               (assoc :input-ch input-ch)
                               (assoc :output-ch output-ch)
                               (assoc :output-mix output-mix)
+                              (assoc :db-ch db-channel)
                               (assoc :branches (atom {"/input"
                                                       {:id "/input"
                                                        :tap-channel input-tap

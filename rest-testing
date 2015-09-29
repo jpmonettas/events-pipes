@@ -56,7 +56,7 @@ Content-Type: application/json
 
 {"thread-id":"1",
 "role":"web",
-"summary": "Get TOTAL entradas",
+"summary": "Get TOTAL entradas !!!!!",
 "detail": {"head":{"request":{"uri":"192.168.1.5:8080\/LifeREST2.0\/price\/schedule\/05771956-4cc6-11e5-835c-bc5ff43cc3f7\/calculateTotalPrice?priceTypeId=2&promoId=0&api_key=d496d812-21ab-4635-ab5a-bd36f0f17a25",
 "method":"POST",
 "payload":"[{\"ticketCatId\":\"1\",
@@ -64,3 +64,60 @@ Content-Type: application/json
 "code":200},
 "body":{"total":122,
 "saleUnits":[{"priceId":"3f37b5d1-4cf2-11e5-835c-bc5ff43cc3f7","quantity":1}]}}}
+
+
+## For elasticsearch
+
+POST http://localhost:9200/events
+
+{
+    "settings" : {
+        "number_of_shards" : 1
+    },
+    "mappings" : {
+        "event" : {
+            "_source" : { "enabled" : false },
+            "_id" : {"path" : "event-id"},
+            "properties" : {
+            "role" : { "type" : "string", "index" : "not_analyzed", "store": "yes" },
+            "summary" : { "type" : "string", "index" : "analyzed", "store": "yes" },
+            "detail" : { "type" : "string", "index" : "analyzed", "store": "yes" },
+            "thread-id" : { "type" : "string", "index" : "not_analyzed", "store": "yes" },
+            "timestamp" : { "type" : "date", "index" : "not_analyzed", "store": "yes", "format" : "date_time" },
+            "remote-addr" : { "type" : "string", "index" : "not_analyzed", "store": "yes" },
+            "event-id" : { "type" : "string", "index" : "not_analyzed", "store": "yes" }
+            }
+        }
+    }
+}
+
+##
+DELETE http://localhost:9200/events?pretty
+
+##
+
+GET http://localhost:9200/_cat/indices?v
+
+##
+
+GET http://localhost:9200/events/_mapping/event
+
+##
+
+POST http://localhost:9200/events/event/
+
+{
+"role" : "error",
+"summary" : "test event 2",
+"detail" : ["1", "2", "3"],
+"remote-addr" : "192.168.1.8",
+"event-id" : "123211231233",
+"thread-id" : null,
+"timestamp" : "2015-08-10T20:00:00.000Z"
+}
+
+##
+
+GET http://localhost:9200/events/event/_search
+
+{"query":{"match_all":{}}, "fields":["role"]}

@@ -5,6 +5,7 @@
   (:require [events-pipes.server.core :as core]
             [events-pipes.server.web-server :as web-server]
             [events-pipes.server.udp-server :as udp-server]
+            [events-pipes.server.database :as database]
             [cider.nrepl :refer [cider-nrepl-handler]]
             [com.stuartsierra.component :as comp]
             [clojure.tools.nrepl.server :as nrepl])
@@ -23,6 +24,8 @@
    :udp-server (comp/using (udp-server/map->UdpServer {:port port})
                            [:taps])
    :web-server (comp/using (web-server/map->WebServer {:port port})
+                           [:taps])
+   :database (comp/using (database/map->Database {})
                            [:taps])))
 
  
