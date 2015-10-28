@@ -2865,8 +2865,8 @@ net.brehaut.ClojureTools = (function (SH) {
     build_tree: build_tree
   };
 })(SyntaxHighlighter);
-</script><title>events-pipes -- Marginalia</title></head><body><table><tr><td class="docs"><div class="header"><h1 class="project-name">events-pipes</h1><h2 class="project-version">0.12.0</h2><br /><p>Event processing server and monitor</p>
-</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.7.0</td></tr><tr><td class="dep-name">org.clojure/clojurescript</td><td class="dotted"><hr /></td><td class="dep-version">1.7.48</td></tr><tr><td class="dep-name">org.clojure/core.async</td><td class="dotted"><hr /></td><td class="dep-version">0.1.346.0-17112a-alpha</td></tr><tr><td class="dep-name">cljsjs/highlight</td><td class="dotted"><hr /></td><td class="dep-version">8.4-0</td></tr><tr><td class="dep-name">http-kit</td><td class="dotted"><hr /></td><td class="dep-version">2.1.18</td></tr><tr><td class="dep-name">reagent</td><td class="dotted"><hr /></td><td class="dep-version">0.5.0</td></tr><tr><td class="dep-name">com.andrewmcveigh/cljs-time</td><td class="dotted"><hr /></td><td class="dep-version">0.3.10</td></tr><tr><td class="dep-name">com.taoensso/sente</td><td class="dotted"><hr /></td><td class="dep-version">1.5.0</td></tr><tr><td class="dep-name">compojure</td><td class="dotted"><hr /></td><td class="dep-version">1.4.0</td></tr><tr><td class="dep-name">ring/ring-json</td><td class="dotted"><hr /></td><td class="dep-version">0.3.1</td></tr><tr><td class="dep-name">org.clojure/tools.nrepl</td><td class="dotted"><hr /></td><td class="dep-version">0.2.7</td></tr><tr><td class="dep-name">cider/cider-nrepl</td><td class="dotted"><hr /></td><td class="dep-version">0.10.0-SNAPSHOT</td></tr><tr><td class="dep-name">cljsjs/d3</td><td class="dotted"><hr /></td><td class="dep-version">3.5.5-3</td></tr><tr><td class="dep-name">aleph</td><td class="dotted"><hr /></td><td class="dep-version">0.4.0</td></tr><tr><td class="dep-name">manifold</td><td class="dotted"><hr /></td><td class="dep-version">0.1.0</td></tr><tr><td class="dep-name">amalloy/ring-buffer</td><td class="dotted"><hr /></td><td class="dep-version">1.2</td></tr><tr><td class="dep-name">byte-streams</td><td class="dotted"><hr /></td><td class="dep-version">0.2.0</td></tr><tr><td class="dep-name">clj-json</td><td class="dotted"><hr /></td><td class="dep-version">0.5.3</td></tr><tr><td class="dep-name">ring-cors</td><td class="dotted"><hr /></td><td class="dep-version">0.1.7</td></tr><tr><td class="dep-name">com.stuartsierra/component</td><td class="dotted"><hr /></td><td class="dep-version">0.3.0</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#events-pipes.client.core">events-pipes.client.core</a></li><li><a href="#events-pipes.client.ui">events-pipes.client.ui</a></li><li><a href="#events-pipes.server.web-server">events-pipes.server.web-server</a></li><li><a href="#events-pipes.server.repl-api">events-pipes.server.repl-api</a></li><li><a href="#events-pipes.server.main">events-pipes.server.main</a></li><li><a href="#events-pipes.server.udp-server">events-pipes.server.udp-server</a></li><li><a href="#events-pipes.server.core">events-pipes.server.core</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#events-pipes.client.core" name="events-pipes.client.core"><h1 class="project-name">events-pipes.client.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+</script><title>events-pipes -- Marginalia</title></head><body><table><tr><td class="docs"><div class="header"><h1 class="project-name">events-pipes</h1><h2 class="project-version">0.13.1</h2><br /><p>Event processing server and monitor</p>
+</div><div class="dependencies"><h3>dependencies</h3><table><tr><td class="dep-name">org.clojure/clojure</td><td class="dotted"><hr /></td><td class="dep-version">1.7.0</td></tr><tr><td class="dep-name">org.clojure/clojurescript</td><td class="dotted"><hr /></td><td class="dep-version">1.7.48</td></tr><tr><td class="dep-name">org.clojure/core.async</td><td class="dotted"><hr /></td><td class="dep-version">0.1.346.0-17112a-alpha</td></tr><tr><td class="dep-name">cljsjs/highlight</td><td class="dotted"><hr /></td><td class="dep-version">8.4-0</td></tr><tr><td class="dep-name">http-kit</td><td class="dotted"><hr /></td><td class="dep-version">2.1.18</td></tr><tr><td class="dep-name">reagent</td><td class="dotted"><hr /></td><td class="dep-version">0.5.0</td></tr><tr><td class="dep-name">com.andrewmcveigh/cljs-time</td><td class="dotted"><hr /></td><td class="dep-version">0.3.10</td></tr><tr><td class="dep-name">com.taoensso/sente</td><td class="dotted"><hr /></td><td class="dep-version">1.5.0</td></tr><tr><td class="dep-name">compojure</td><td class="dotted"><hr /></td><td class="dep-version">1.4.0</td></tr><tr><td class="dep-name">ring/ring-json</td><td class="dotted"><hr /></td><td class="dep-version">0.3.1</td></tr><tr><td class="dep-name">clojurewerkz/elastisch</td><td class="dotted"><hr /></td><td class="dep-version">2.1.0</td></tr><tr><td class="dep-name">org.clojure/tools.nrepl</td><td class="dotted"><hr /></td><td class="dep-version">0.2.7</td></tr><tr><td class="dep-name">cider/cider-nrepl</td><td class="dotted"><hr /></td><td class="dep-version">0.10.0-SNAPSHOT</td></tr><tr><td class="dep-name">cljsjs/d3</td><td class="dotted"><hr /></td><td class="dep-version">3.5.5-3</td></tr><tr><td class="dep-name">aleph</td><td class="dotted"><hr /></td><td class="dep-version">0.4.0</td></tr><tr><td class="dep-name">manifold</td><td class="dotted"><hr /></td><td class="dep-version">0.1.0</td></tr><tr><td class="dep-name">amalloy/ring-buffer</td><td class="dotted"><hr /></td><td class="dep-version">1.2</td></tr><tr><td class="dep-name">byte-streams</td><td class="dotted"><hr /></td><td class="dep-version">0.2.0</td></tr><tr><td class="dep-name">clj-json</td><td class="dotted"><hr /></td><td class="dep-version">0.5.3</td></tr><tr><td class="dep-name">ring-cors</td><td class="dotted"><hr /></td><td class="dep-version">0.1.7</td></tr><tr><td class="dep-name">com.stuartsierra/component</td><td class="dotted"><hr /></td><td class="dep-version">0.3.0</td></tr></table></div></td><td class="codes" style="text-align: center; vertical-align: middle;color: #666;padding-right:20px"><br /><br /><br />(this space intentionally left almost blank)</td></tr><tr><td class="docs"><div class="toc"><a name="toc"><h3>namespaces</h3></a><ul><li><a href="#events-pipes.client.core">events-pipes.client.core</a></li><li><a href="#events-pipes.client.ui">events-pipes.client.ui</a></li><li><a href="#events-pipes.server.web-server">events-pipes.server.web-server</a></li><li><a href="#events-pipes.server.repl-api">events-pipes.server.repl-api</a></li><li><a href="#events-pipes.server.main">events-pipes.server.main</a></li><li><a href="#events-pipes.server.udp-server">events-pipes.server.udp-server</a></li><li><a href="#events-pipes.server.database">events-pipes.server.database</a></li><li><a href="#events-pipes.server.core">events-pipes.server.core</a></li></ul></div></td><td class="codes">&nbsp;</td></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#events-pipes.client.core" name="events-pipes.client.core"><h1 class="project-name">events-pipes.client.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(ns ^:figwheel-always events-pipes.client.core
     (:require-macros [cljs.core.async.macros :as asyncm :refer (go go-loop)])
     (:require [clojure.string :as str]
@@ -3005,7 +3005,7 @@ From rendering the react components thru managing the user events</p>
        (.highlightBlock js/hljs (reagent/dom-node this)))})) </pre></td></tr><tr><td class="docs"><p>React component for header of the UI with the connect box</p>
 </td><td class="codes"><pre class="brush: clojure">(defn header
   [connected]
-  (let [server-address (atom &quot;localhost:7777&quot;)]
+  (let [server-address (atom (str (-&gt; js/window .-location .-host)))]
     (fn [props]
       [:div.form-inline.server-container 
        [:div.input-group.server
@@ -3276,7 +3276,7 @@ A small api to work with taps thru the repl</p>
 </td><td class="codes"><pre class="brush: clojure">(defmacro add-tap
   [from-id name transducer-form]
   `(do
-     (core/add-tap (:taps m/server-system) ~from-id ~name ~transducer-form (quote ~transducer-form))
+     (core/add-tap (:taps m/server-system) ~from-id ~name ~transducer-form (quote ~transducer-form) true)
      (web-server/notify-taps-change (:taps m/server-system)
                                     (-&gt; m/server-system :web-server :sente-ch-socket))))</pre></td></tr><tr><td class="docs"><h1>For working with the repl</h1>
 </td><td class="codes"><pre class="brush: clojure">(comment
@@ -3295,21 +3295,24 @@ taps</p>
   (:require [events-pipes.server.core :as core]
             [events-pipes.server.web-server :as web-server]
             [events-pipes.server.udp-server :as udp-server]
+            [events-pipes.server.database :as database]
             [cider.nrepl :refer [cider-nrepl-handler]]
             [com.stuartsierra.component :as comp]
             [clojure.tools.nrepl.server :as nrepl])
   (:gen-class))</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(def server-system nil)
 (def nrepl-server nil)</pre></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defn start-nrepl-server []
+</td><td class="codes"><pre class="brush: clojure">(defn start-nrepl-server [nrepl-port]
   (alter-var-root #'nrepl-server
-                  (fn [s] (nrepl/start-server :handler cider-nrepl-handler :port 7778))))</pre></td></tr><tr><td class="docs">
+                  (fn [s] (nrepl/start-server :handler cider-nrepl-handler :port nrepl-port))))</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defn create-server-system [port]
   (comp/system-map
    :taps (core/map-&gt;Taps {})
    :udp-server (comp/using (udp-server/map-&gt;UdpServer {:port port})
                            [:taps])
    :web-server (comp/using (web-server/map-&gt;WebServer {:port port})
+                           [:taps])
+   :database (comp/using (database/map-&gt;Database {})
                            [:taps])))</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defn start-server-system [port]
   (println &quot;Starting server system&quot;)
@@ -3324,14 +3327,19 @@ taps</p>
    (when server-system (stop-server-system))
    (start-server-system 7777)))</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defn -main
-  [&amp; [taps-file port &amp; _]]
-  (start-nrepl-server)
+  [&amp; [port nrepl-port taps-file &amp; _]]
+  (when (or (nil? port) (nil? nrepl-port))
+    (println &quot;Usage: java -jar events.jar port nrepl-port [taps-file]&quot;)
+    (System/exit 1))
+  (start-nrepl-server (read-string nrepl-port))
   (start-server-system (read-string port))
-  (core/load-taps (:taps server-system) taps-file)
+  (when taps-file
+    (core/load-taps (:taps server-system) taps-file))
   (web-server/notify-taps-change (:taps server-system) (-&gt; server-system :web-server :sente-ch-socket))
   (println (format &quot;Receiving events on POST to http://this-box:%s/event or UDP datagram on %s&quot; port port)) 
+  (println (format &quot;You can read events connecting to ws://this-box:%s/chsk&quot; port)) 
   (println (format &quot;Done! Point your browser to http://this-box:%s/index.html&quot; port))
-  (println &quot;You also have an nrepl server at 7778&quot;))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#events-pipes.server.udp-server" name="events-pipes.server.udp-server"><h1 class="project-name">events-pipes.server.udp-server</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
+  (println (format &quot;You also have an nrepl server at %s&quot; nrepl-port)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#events-pipes.server.udp-server" name="events-pipes.server.udp-server"><h1 class="project-name">events-pipes.server.udp-server</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(ns events-pipes.server.udp-server
   (:require [com.stuartsierra.component :as comp]
             [byte-streams :as bs]
@@ -3368,7 +3376,40 @@ every message recieved thru the udp socket</p>
   (stop [this]
     (println &quot;Stoping UdpServer component...&quot;)
     (ms/close! server)
-    (dissoc this :server)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#events-pipes.server.core" name="events-pipes.server.core"><h1 class="project-name">events-pipes.server.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p><img src="./server.png" alt="Tap" />
+    (dissoc this :server)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#events-pipes.server.database" name="events-pipes.server.database"><h1 class="project-name">events-pipes.server.database</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p>This namespace deals with :</p>
+</td><td class="codes"></td></tr><tr><td class="docs"><ul>
+<li>Connecting to a elasticsearch db</li>
+<li>Running a process that will read events from taps :db-ch and publish them en ES</li>
+</ul>
+</td><td class="codes"><pre class="brush: clojure">(ns events-pipes.server.database
+  (:require [clojurewerkz.elastisch.native :as es]
+            [clojurewerkz.elastisch.native.document :as esdoc]
+            [com.stuartsierra.component :as comp]
+            [clojure.core.async :refer [chan sliding-buffer go-loop &lt;! tap]]
+            [clj-time.format :as tf]
+            [clj-json.core :as json]
+            [clj-time.coerce :as tc]))</pre></td></tr><tr><td class="docs">
+</td><td class="codes"><pre class="brush: clojure">(defrecord Database [conn taps]
+  comp/Lifecycle
+  (start [this]
+    (println &quot;Starting Database component...&quot;)
+    (let [connection (es/connect  [[&quot;127.0.0.1&quot; 9300]]
+                                  {&quot;cluster.name&quot; &quot;elasticsearch&quot;})
+          dtf (tf/formatters :date-time)
+          events-ch (:db-ch taps)]
+      ;; If the connection get closed, it will throw an exception and
+      ;; the process will die
+      (go-loop []
+        (let [ev (&lt;! events-ch)]
+          (esdoc/create connection &quot;events&quot; &quot;event&quot; (-&gt; ev
+                                                       (update-in [:timestamp] #(tf/unparse dtf (tc/from-date %)))
+                                                       (update-in [:detail] json/generate-string)))          
+          (when ev (recur))))
+      (-&gt; this
+         (assoc :conn connection))))
+  (stop [this]
+    (println &quot;Stoping Database component...&quot;)
+    (dissoc this :conn)))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr><tr><td class="docs"><div class="docs-header"><a class="anchor" href="#events-pipes.server.core" name="events-pipes.server.core"><h1 class="project-name">events-pipes.server.core</h1><a class="toc-link" href="#toc">toc</a></a></div></td><td class="codes" /></tr><tr><td class="docs"><p><img src="./server.png" alt="Tap" />
 This namespace implements all events tree(Taps) wiring.
 <strong>Important</strong> :</p>
 </td><td class="codes"></td></tr><tr><td class="docs"><ul>
@@ -3388,6 +3429,7 @@ This namespace implements all events tree(Taps) wiring.
             [aleph.udp :as udp]
             [manifold.stream :as ms]
             [byte-streams :as bs]
+            [amalloy.ring-buffer :refer [ring-buffer]]
             [com.stuartsierra.component :as comp])
   (:import [java.util Date])
   (:gen-class))</pre></td></tr><tr><td class="docs"><p>Every tap has a sliding buffer for back pressure.
@@ -3407,7 +3449,7 @@ This namespace implements all events tree(Taps) wiring.
 
 <p><img src="./tap.png" alt="Tap" /></p>
 </td><td class="codes"><pre class="brush: clojure">(defn add-tap
-  [taps from-id name transducer transducer-form]
+  [taps from-id name transducer transducer-form muted-on-start]
   (let [branches (:branches taps)
         new-id (str (get-in @branches [from-id :id]) &quot;/&quot; (str/lower-case name))]
     (when (not (contains? @branches new-id))
@@ -3423,27 +3465,31 @@ This namespace implements all events tree(Taps) wiring.
                                       :tap-channel mix-ch
                                       :mult ch-mult
                                       :name name
-                                      :muted? true})
+                                      :muted? muted-on-start})
         (tap from-mult ch)
         (tap ch-mult mix-ch)
-        (toggle (:output-mix taps) {mix-ch {:mute true}})))
+        (toggle (:output-mix taps) {mix-ch {:mute muted-on-start}})))
     new-id))</pre></td></tr><tr><td class="docs">
 </td><td class="codes"><pre class="brush: clojure">(defn normalize-localhost-ip [remote-addr]
   (if (or (= remote-addr &quot;127.0.0.1&quot;)
          (= remote-addr &quot;0:0:0:0:0:0:0:1&quot;))
     &quot;localhost&quot;
     remote-addr))</pre></td></tr><tr><td class="docs"><p>Adds an event thru the input-ch of taps.
-  An event is a map with <code>:event-id</code> <code>:remote-addr</code> <code>:timestamp</code> <code>:role</code> <code>:summary</code> <code>:detail</code> <code>:thread-id</code></p>
+  An event is a map with <code>:event-id</code> <code>:remote-addr</code> <code>:timestamp</code> <code>:role</code> <code>:summary</code> <code>:detail</code> <code>:thread-id</code> <code>:tags</code></p>
 </td><td class="codes"><pre class="brush: clojure">(defn post-event!
-  [taps remote-addr {:keys [role summary detail thread-id]}]
-  (let [event-id (str (java.util.UUID/randomUUID))]
-    (&gt;!! (:input-ch taps) {:event-id event-id
-                           :remote-addr (normalize-localhost-ip remote-addr)
-                           :timestamp (Date.)
-                           :role role
-                           :thread-id thread-id
-                           :summary summary
-                           :detail detail}) 
+  [taps remote-addr {:keys [role summary detail thread-id tags]}]
+  (let [event-id (str (java.util.UUID/randomUUID))
+        ev {:event-id event-id
+            :remote-addr (normalize-localhost-ip remote-addr)
+            :timestamp (Date.)
+            :role role
+            :thread-id thread-id
+            :summary summary
+            :tags tags
+            :detail detail}]
+    ;; post every event on the input channel and the persistence ch
+    (&gt;!! (:input-ch taps) ev) 
+    (&gt;!! (:db-ch taps) ev) 
     event-id))</pre></td></tr><tr><td class="docs"><p>Given the taps component and a filename, loads all the taps.
   This will only work if your channels are empty (not intended for reload)</p>
 </td><td class="codes"><pre class="brush: clojure">(defn load-taps
@@ -3457,7 +3503,10 @@ This namespace implements all events tree(Taps) wiring.
              (:from-id t)
              (:name t)
              (eval (:transducer-form t))
-             (:transducer-form t))))</pre></td></tr><tr><td class="docs"><p>The Taps component will initialize and destroy the Taps subsystem</p>
+             (:transducer-form t)
+             (if (nil? (:muted-on-start t))
+               true
+               (:muted-on-start t)))))</pre></td></tr><tr><td class="docs"><p>The Taps component will initialize and destroy the Taps subsystem</p>
 </td><td class="codes"></td></tr><tr><td class="docs"><p><strong>Starting taps component</strong> is about</p>
 </td><td class="codes"></td></tr><tr><td class="docs"><ul>
 <li>Creating the input channel</li>
@@ -3467,12 +3516,13 @@ This namespace implements all events tree(Taps) wiring.
 </td><td class="codes"></td></tr><tr><td class="docs"><p><strong>Stopping taps component</strong> is about removing all references so everything can be
 garbage collected</p>
 </td><td class="codes"></td></tr><tr><td class="docs">
-</td><td class="codes"><pre class="brush: clojure">(defrecord Taps [input-ch output-ch output-mix branches]
+</td><td class="codes"><pre class="brush: clojure">(defrecord Taps [input-ch output-ch output-mix branches db-ch]
   comp/Lifecycle
   (start [this]
     (println &quot;Starting Taps component...&quot;)
     (let [input-ch (chan (sliding-buffer taps-buffer-size) (map #(assoc % :tap-id &quot;/input&quot;)))
           output-ch (chan (sliding-buffer taps-buffer-size))
+          db-channel (chan (sliding-buffer taps-buffer-size)) 
           input-mult (mult input-ch)
           output-mix (mix output-ch)
           input-tap (tap input-mult (chan (sliding-buffer 10)))
@@ -3480,6 +3530,7 @@ garbage collected</p>
                               (assoc :input-ch input-ch)
                               (assoc :output-ch output-ch)
                               (assoc :output-mix output-mix)
+                              (assoc :db-ch db-channel)
                               (assoc :branches (atom {&quot;/input&quot;
                                                       {:id &quot;/input&quot;
                                                        :tap-channel input-tap
@@ -3494,7 +3545,7 @@ garbage collected</p>
        (dissoc :input-ch)
        (dissoc :output-ch)
        (dissoc :output-mix)
-       (dissoc :branches))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_events-pipes.client.core">events-pipes.client.core</li><li class="floating-toc-li" id="floating-toc_events-pipes.client.ui">events-pipes.client.ui</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.web-server">events-pipes.server.web-server</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.repl-api">events-pipes.server.repl-api</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.main">events-pipes.server.main</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.udp-server">events-pipes.server.udp-server</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.core">events-pipes.server.core</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
+       (dissoc :branches))))</pre></td></tr><tr><td class="spacer docs">&nbsp;</td><td class="codes" /></tr></table><div class="footer">Generated by <a href="https://github.com/gdeer81/marginalia">Marginalia</a>.&nbsp;&nbsp;Syntax highlighting provided by Alex Gorbatchev's <a href="http://alexgorbatchev.com/SyntaxHighlighter/">SyntaxHighlighter</a><div id="floating-toc"><ul><li class="floating-toc-li" id="floating-toc_events-pipes.client.core">events-pipes.client.core</li><li class="floating-toc-li" id="floating-toc_events-pipes.client.ui">events-pipes.client.ui</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.web-server">events-pipes.server.web-server</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.repl-api">events-pipes.server.repl-api</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.main">events-pipes.server.main</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.udp-server">events-pipes.server.udp-server</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.database">events-pipes.server.database</li><li class="floating-toc-li" id="floating-toc_events-pipes.server.core">events-pipes.server.core</li></ul></div></div><script type="text/javascript">SyntaxHighlighter.defaults['gutter'] = false;
 SyntaxHighlighter.all();
 
 // hackity hack
