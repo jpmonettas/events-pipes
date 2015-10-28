@@ -36,7 +36,7 @@
   "Add a tap to the system"
   [from-id name transducer-form]
   `(do
-     (core/add-tap (:taps m/server-system) ~from-id ~name ~transducer-form (quote ~transducer-form))
+     (core/add-tap (:taps m/server-system) ~from-id ~name ~transducer-form (quote ~transducer-form) true)
      (web-server/notify-taps-change (:taps m/server-system)
                                     (-> m/server-system :web-server :sente-ch-socket))))
 

@@ -14,9 +14,9 @@
 (def server-system nil)
 (def nrepl-server nil)
 
-(defn start-nrepl-server []
+(defn start-nrepl-server [nrepl-port]
   (alter-var-root #'nrepl-server
-                  (fn [s] (nrepl/start-server :handler cider-nrepl-handler :port 7778))))
+                  (fn [s] (nrepl/start-server :handler cider-nrepl-handler :port nrepl-port))))
 
 (defn create-server-system [port]
   (comp/system-map
@@ -45,15 +45,22 @@
    (start-server-system 7777)))
 
 (defn -main
-  [& [taps-file port & _]]
+  [& [port nrepl-port taps-file & _]]
 
-  (start-nrepl-server)
+  (when (or (nil? port) (nil? nrepl-port))
+    (println "Usage: java -jar events.jar port nrepl-port [taps-file]")
+    (System/exit 1))
+  
+  (start-nrepl-server (read-string nrepl-port))
   
   (start-server-system (read-string port))
 
-  (core/load-taps (:taps server-system) taps-file)
+  (when taps-file
+    (core/load-taps (:taps server-system) taps-file))
+  
   (web-server/notify-taps-change (:taps server-system) (-> server-system :web-server :sente-ch-socket))
 
   (println (format "Receiving events on POST to http://this-box:%s/event or UDP datagram on %s" port port)) 
+  (println (format "You can read events connecting to ws://this-box:%s/chsk" port)) 
   (println (format "Done! Point your browser to http://this-box:%s/index.html" port))
-  (println "You also have an nrepl server at 7778"))
+  (println (format "You also have an nrepl server at %s" nrepl-port)))

@@ -1,4 +1,4 @@
-(defproject events-pipes "0.12.1"
+(defproject events-pipes "0.13.1"
   :description "Event processing server and monitor"
   :url ""
   :license {:name "Eclipse Public License"
@@ -22,7 +22,7 @@
                  [cider/cider-nrepl "0.10.0-SNAPSHOT"]
 
                  [cljsjs/d3 "3.5.5-3"]
-                 
+
                  [aleph "0.4.0"]
                  [manifold "0.1.0"]
                  [amalloy/ring-buffer "1.2"]
@@ -70,7 +70,7 @@
              ;; doesn't work for you just run your own server :)y
              ;; :ring-handler events-pipes.server/my-app
 
-             ;; To be able to open files in your editor from the heads up display
+             ;; To be able to open files in yourr editor from the heads up display
              ;; you will need to put a script on your path.
              ;; that script will have to take a file path and a line number
              ;; ie. in  ~/bin/myfile-opener

@@ -31,8 +31,10 @@ Content-Type: application/json
 POST http://localhost:7777/event
 Content-Type: application/json
 
-{"role": "error",
-"summary": "What's up yo! Fer"}
+{"role": "seat-toggle",
+"summary": "Seat clicked'",
+"detail": {"seatId": "AE1734E9-857D-4ECC-B01C-6D52744F12D5",
+          "clientId": "88841750-0CAF-424B-AA16-A28F954C1C22"}}
 
 ###
 
@@ -68,7 +70,7 @@ Content-Type: application/json
 
 ## For elasticsearch
 
-POST http://localhost:9200/events
+POST http://192.168.1.5:9200/events
 
 {
     "settings" : {
@@ -82,6 +84,7 @@ POST http://localhost:9200/events
             "role" : { "type" : "string", "index" : "not_analyzed", "store": "yes" },
             "summary" : { "type" : "string", "index" : "analyzed", "store": "yes" },
             "detail" : { "type" : "string", "index" : "analyzed", "store": "yes" },
+            "tags" : { "type" : "string", "index" : "analyzed", "store": "yes" },
             "thread-id" : { "type" : "string", "index" : "not_analyzed", "store": "yes" },
             "timestamp" : { "type" : "date", "index" : "not_analyzed", "store": "yes", "format" : "date_time" },
             "remote-addr" : { "type" : "string", "index" : "not_analyzed", "store": "yes" },
@@ -92,19 +95,19 @@ POST http://localhost:9200/events
 }
 
 ##
-DELETE http://localhost:9200/events?pretty
+DELETE http://192.168.1.5:9200/events?pretty
 
 ##
 
-GET http://localhost:9200/_cat/indices?v
+GET http://192.168.1.5:9200/_cat/indices?v
 
 ##
 
-GET http://localhost:9200/events/_mapping/event
+GET http://192.168.1.5:9200/events/_mapping/event
 
 ##
 
-POST http://localhost:9200/events/event/
+POST http://192.168.1.5:9200/events/event/
 
 {
 "role" : "error",
@@ -118,6 +121,6 @@ POST http://localhost:9200/events/event/
 
 ##
 
-GET http://localhost:9200/events/event/_search
+POST http://192.168.1.5:9200/events/event/_search
 
 {"query":{"match_all":{}}, "fields":["role"]}

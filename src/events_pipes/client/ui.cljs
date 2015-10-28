@@ -76,7 +76,7 @@
 (defn header
   "React component for header of the UI with the connect box"
   [connected]
-  (let [server-address (atom "localhost:7777")]
+  (let [server-address (atom (str (-> js/window .-location .-host)))]
     (fn [props]
       [:div.form-inline.server-container 
        [:div.input-group.server

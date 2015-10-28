@@ -38,8 +38,8 @@ div.last-event > div.summary{
 div#taps-panel{
     border: 1px solid;
     position: fixed;
-    width: 700px;
-    left: -700px;
+    width: 800px;
+    left: -800px;
     height: 80%;
     top: 130px;
     background-color: white;
@@ -49,7 +49,7 @@ div#taps-panel{
 div#taps-panel > span{
     background-color: white;
     position: relative;
-    left: 698px;
+    left: 798px;
     top:-1px;
     border: 1px solid;
     padding-bottom: 20px;

@@ -17,6 +17,7 @@
             [aleph.udp :as udp]
             [manifold.stream :as ms]
             [byte-streams :as bs]
+            [amalloy.ring-buffer :refer [ring-buffer]]
             [com.stuartsierra.component :as comp])
   (:import [java.util Date])
   (:gen-class))
@@ -42,7 +43,7 @@
   and a transucer-form(the form that evaluated will generate the transducer) builds a new tap
   and add it to taps branches, making all the wiring needed to be a working tap.
   If a tap with that name is already in taps, doesn't do anything and just returns the id."
-  [taps from-id name transducer transducer-form]
+  [taps from-id name transducer transducer-form muted-on-start]
   (let [branches (:branches taps)
         new-id (str (get-in @branches [from-id :id]) "/" (str/lower-case name))]
     (when (not (contains? @branches new-id))
@@ -58,10 +59,10 @@
                                       :tap-channel mix-ch
                                       :mult ch-mult
                                       :name name
-                                      :muted? true})
+                                      :muted? muted-on-start})
         (tap from-mult ch)
         (tap ch-mult mix-ch)
-        (toggle (:output-mix taps) {mix-ch {:mute true}})))
+        (toggle (:output-mix taps) {mix-ch {:mute muted-on-start}})))
     new-id))
 
 (defn normalize-localhost-ip [remote-addr]
@@ -105,7 +106,10 @@
              (:from-id t)
              (:name t)
              (eval (:transducer-form t))
-             (:transducer-form t))))
+             (:transducer-form t)
+             (if (nil? (:muted-on-start t))
+               true
+               (:muted-on-start t)))))
 
 ;; The Taps component will initialize and destroy the Taps subsystem
 
