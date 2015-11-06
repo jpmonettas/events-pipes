@@ -1,4 +1,4 @@
-(defproject events-pipes "0.13.1"
+(defproject events-pipes "0.13.2"
   :description "Event processing server and monitor"
   :url ""
   :license {:name "Eclipse Public License"

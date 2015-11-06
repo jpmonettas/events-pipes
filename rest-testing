@@ -31,7 +31,7 @@ Content-Type: application/json
 POST http://localhost:7777/event
 Content-Type: application/json
 
-{"role": "seat-toggle",
+{"role": "DEBUG",
 "summary": "Seat clicked'",
 "detail": {"seatId": "AE1734E9-857D-4ECC-B01C-6D52744F12D5",
           "clientId": "88841750-0CAF-424B-AA16-A28F954C1C22"}}
@@ -124,3 +124,11 @@ POST http://192.168.1.5:9200/events/event/
 POST http://192.168.1.5:9200/events/event/_search
 
 {"query":{"match_all":{}}, "fields":["role"]}
+
+#
+POST http://200.108.219.250:7777/event
+Content-Type: application/json
+
+{"role": "debug",
+"summary": "testing",
+"tags": ["kiosk", "ABN1"]}

@@ -44,6 +44,17 @@
   []
   (swap! core/app-state merge {:selected 0 :role-colors {} :events {}}))
 
+(defn select-tab [t]
+  (swap! core/app-state assoc :selected-tab t))
+
+(defn remove-tab [t]
+  (swap! core/app-state update-in [:events] dissoc t))
+
+(defn tab-click [ev t]
+  (case (-> ev .-button) 
+    0 (select-tab t)
+    1 (remove-tab t)))
+
 (defn toggle-taps-panel
   "User clicked the arrow to toggle show/hide the pas panel"
   []
@@ -98,9 +109,8 @@
   [:div#events
    [:ul.nav.nav-tabs
     (doall (for [t (keys (:events @core/app-state))]
-             [:li (merge
-                   {:on-click #(swap! core/app-state assoc :selected-tab t)}
-                   (when (= (:selected-tab @core/app-state) t) {:class :active})) [:a t]]))]
+             [:li (when (= (:selected-tab @core/app-state) t) {:class :active})
+              [:a {:on-click #(tab-click % t)} t]]))]
     [:div.tab-content
      [:ul (doall
            (map-indexed
