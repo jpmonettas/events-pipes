@@ -151,8 +151,10 @@
     [taps-panel]
     (when (:modal-open? @core/app-state)
       (let [ev (:selected @core/app-state)]
-          [:div.last-event {:on-click #(when (:modal-open? @core/app-state) (close-modal))}
-           [:div.summary (:summary ev)]
+        [:div.last-event
+         [:a.close-detail
+          [:span.glyphicon.glyphicon-remove {:on-click #(when (:modal-open? @core/app-state) (close-modal))}]]
+         [:div.summary {} (:summary ev)]
            (when (:detail ev)
              [:pre.code 
               [selected-event ev]])]))]

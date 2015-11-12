@@ -21,6 +21,16 @@ div.last-event {
     width: 80%;
     left: 10%;
     top:140px;
+   
+}
+
+div.last-event > a.close-detail{
+    position: relative;
+    left: -16px;
+    border: 1px solid;
+    background-color: white;
+    width: 19px;
+    top: 20px;
 }
 
 div.last-event > pre {
