@@ -14,58 +14,22 @@
 
 
  
-;; # User events handling
+(defn dispatch
+  ([action] (dispatch action nil))
+  ([action data]
+   (core/dispatch core/app-state {:type action :data data})))
 
-(defn select-event
-  "User clicked an event line"
-  [ev]
-  (swap! core/app-state (fn [s] (-> s
-                               (assoc :selected ev)
-                               (assoc :modal-open? true)))))
-
-(defn close-modal
-  "User wants to close the detail modal"
-  []
-  (swap! core/app-state assoc :modal-open? false))
-
-(defn toggle-tap
-  "User clicked on a tree tap to toggle it on/off"
-  [tap-id]
-  (let [chsk-send! (:send-fn @core/app-state)]
-    (chsk-send! [:taps/tap-toggled tap-id])))
-
-(defn connect
-  "User clicked the connect button"
-  [server]
-  (core/connect server))
- 
-(defn clear-events
-  "User clicked the clear events button"
-  []
-  (swap! core/app-state merge {:selected 0 :role-colors {} :events {}}))
-
-(defn select-tab [t]
-  (swap! core/app-state assoc :selected-tab t))
-
-(defn remove-tab [t]
-  (swap! core/app-state update-in [:events] dissoc t))
-
-(defn tab-click [ev t]
-  (case (-> ev .-button) 
-    0 (select-tab t)
-    1 (remove-tab t)))
-
-(defn toggle-taps-panel
-  "User clicked the arrow to toggle show/hide the pas panel"
-  []
-  (swap! core/app-state update-in [:taps-panel-open?] #(not %))) 
 
 (defn search-changed
   "User changed the content of the search box"
   [e]
   (let [text (-> e .-target .-value)]
-    (swap! core/app-state assoc :ev-pattern (re-pattern (str ".*" text ".*")))))
+    (dispatch :search-changed text))) 
 
+(defn tab-click [ev t]
+  (case (-> ev .-button) 
+    0 (dispatch :select-tab t)
+    1 (dispatch :remove-tab t)))
 
 ;; # React components
 
@@ -95,49 +59,57 @@
         [:input.form-control {:type :text
                               :on-change #(reset! server-address (-> % .-target .-value))
                               :value @server-address}]]
-       [:button.btn.btn-info {:on-click #(connect @server-address)} [:span.glyphicon.glyphicon-link]]
-       [:button.btn.btn-danger.clear {:on-click #(clear-events)} [:span.glyphicon.glyphicon-trash]]
+       [:button.btn.btn-info {:on-click #(dispatch :connect @server-address)} [:span.glyphicon.glyphicon-link]]
+       [:button.btn.btn-danger.clear {:on-click #(dispatch :clear-events)} [:span.glyphicon.glyphicon-trash]]
        
        [:div.input-group.search
         [:span.glyphicon.glyphicon-search.input-group-addon]
         [:input.search.form-control {:type :text
-                                     :on-change #(search-changed %)}]]])))
+                                     :on-change #(dispatch :search-changed (-> % .-target .-value))}]]])))
 
 (defn events
   "React component for events. Draws a tabs panel each with it's events"
-  []
+  [{:keys [events selected-tab ev-pattern]}]
   [:div#events
    [:ul.nav.nav-tabs
-    (doall (for [t (keys (:events @core/app-state))]
-             [:li (when (= (:selected-tab @core/app-state) t) {:class :active})
-              [:a {:on-click #(tab-click % t)} t]]))]
+    (doall (map-indexed
+            (fn [idx t]
+              [:li (merge
+                    {:key idx}
+                    (when (= selected-tab t) {:class :active}))
+               [:a {:on-click #(tab-click % t)} t]])
+            (keys events)))]
     [:div.tab-content
      [:ul (doall
            (map-indexed
             (fn [idx {:keys [timestamp remote-addr role color summary detail] :as ev}]
               [:li {:key idx
-                    :on-click #(select-event ev)}
-               [:span.timestamp {:style {:background-color color}} (tf/unparse (tf/formatter "HH:mm:ss.SSS")
-                                                                               (tc/from-long (.getTime timestamp)))] 
+                    :on-click #(dispatch :select-event ev)}
+               [:span.timestamp {:style {:background-color color}} (try
+                                                                     (->> (.getTime timestamp)
+                                                                          tc/from-long
+                                                                          (tf/unparse (tf/formatter "HH:mm:ss.SSS") ))
+                                                                     (catch js/Error e
+                                                                         "FIX ME"))] 
                [:span.ip {:style {:background-color color}} remote-addr]
                [:span.role {:style {:background-color color}} role]
-               [:span.content {:style {:background-color color}} (when detail [:span.glyphicon.glyphicon-fullscreen]) (str summary)]])
+               [:span.content {:style {:background-color color}} (when detail
+                                                                   [:span.glyphicon.glyphicon-fullscreen]) (str summary)]])
 
             ;; every time we are going to render the events filter only the ones that matches
             ;; the regexp in the search box
-            (filter #(re-matches (:ev-pattern @core/app-state) (apply str %))
-                    (get-in @core/app-state [:events (:selected-tab @core/app-state)]))))]]])
+            (filter #(re-matches ev-pattern (apply str %))
+                    (get events selected-tab))))]]])
 
 
 (defn taps-panel
   "React component. Draws the taps panel where we draw the tree"
-  []
-  [:div#taps-panel {:class (when (:taps-panel-open? @core/app-state)
-                             "taps-panel-open")}
-   [:span.glyphicon {:class (if (:taps-panel-open? @core/app-state)
+  [taps-panel-open?]
+  [:div#taps-panel {:class (when taps-panel-open? "taps-panel-open")}
+   [:span.glyphicon {:class (if taps-panel-open?
                               "glyphicon-menu-left"
                               "glyphicon-menu-right")
-                     :on-click toggle-taps-panel} ""]
+                     :on-click #(dispatch :toggle-taps-panel)} ""]
    ;; We are not rendering this with react, since we are doing this
    ;; with D3 library
    [:div#taps-tree]]) 
@@ -145,20 +117,21 @@
 (defn ui
   "React component. Main UI component"
   []
-  [:div 
-   [:div#header
-    [header]
-    [taps-panel]
-    (when (:modal-open? @core/app-state)
-      (let [ev (:selected @core/app-state)]
-        [:div.last-event
-         [:a.close-detail
-          [:span.glyphicon.glyphicon-remove {:on-click #(when (:modal-open? @core/app-state) (close-modal))}]]
-         [:div.summary {} (:summary ev)]
-           (when (:detail ev)
-             [:pre.code 
-              [selected-event ev]])]))]
-   [events]])  
+  (let [store @(core/get-state core/app-state)
+        {:keys [modal-open? selected taps-panel-open?]} store]
+   [:div 
+    [:div#header
+     [header]
+     [taps-panel taps-panel-open?]
+     (when modal-open?
+       [:div.last-event
+        [:a.close-detail
+         [:span.glyphicon.glyphicon-remove {:on-click #(when modal-open? (dispatch :close-modal))}]]
+        [:div.summary {} (:summary selected)]
+        (when (:detail selected)
+          [:pre.code 
+           [selected-event selected]])])]
+    [events store]]))  
 
 (reagent/render-component [ui]
                           (. js/document (getElementById "app"))) 
@@ -210,7 +183,7 @@
                                           .-id))))
         node-enter (-> (.enter node)
                        (.append "g")
-                       (.on "click" (fn [d] (toggle-tap (.-id d))))
+                       (.on "click" (fn [d] (dispatch :toggle-tap (.-id d))))
                        (.attr "class" "node")
                        (.attr "transform" (fn [d]
                                             (str "translate(" (.-y d) "," (.-x d) ")"))))]
@@ -238,7 +211,7 @@
 ;; To make it feel like react we are watching the state
 ;; and if something changes repain the whole tree
 
-(add-watch core/app-state :taps-watcher
+(add-watch (core/get-state core/app-state) :taps-watcher
            (fn [_ _ {old-taps :taps} {new-taps :taps}]
              (when (and (not (= old-taps new-taps))
                         (not (empty? new-taps)))

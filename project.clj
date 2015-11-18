@@ -5,12 +5,12 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.7.48"]
+                 [org.clojure/clojurescript "1.7.122"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [cljsjs/highlight "8.4-0"]
                  [http-kit "2.1.18"]
                  [reagent "0.5.0"]
-                 [com.andrewmcveigh/cljs-time "0.3.10"]
+                 [com.andrewmcveigh/cljs-time "0.3.14"]
                  [com.taoensso/sente "1.5.0"]
                  [compojure "1.4.0"]
                  [ring/ring-json "0.3.1"]
@@ -18,7 +18,7 @@
                  [clojurewerkz/elastisch "2.1.0"]
                  
                  ;; To embeed a nrepl server in the app
-                 [org.clojure/tools.nrepl "0.2.7"]
+                 [org.clojure/tools.nrepl "0.2.12"]
                  [cider/cider-nrepl "0.10.0-SNAPSHOT"]
 
                  [cljsjs/d3 "3.5.5-3"]
@@ -32,7 +32,7 @@
                  [com.stuartsierra/component "0.3.0"]]
 
   :plugins [[lein-cljsbuild "1.1.0"]
-            [lein-figwheel "0.4.0"]
+            [lein-figwheel "0.5.0-1"]
             [michaelblume/lein-marginalia "0.9.0"]]
 
   :main ^:skip-aot events-pipes.server.main
@@ -41,12 +41,12 @@
 
   ;; This is commented out because it's breaking the uberjar (not including the js)
   ;; try rm resources/public/js/compiled -rf, the cljsbuild once, and then uberjar
-  ;;:clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
     :builds [{:id "dev"
               :source-paths ["src"]
-              :figwheel false
+              :figwheel true
               :compiler {:main events-pipes.client.ui
                          :asset-path "js/compiled/out"
                          :output-to "resources/public/js/compiled/events_pipes.js"
