@@ -47,7 +47,7 @@
     :builds [{:id "dev"
               :source-paths ["src"]
               :figwheel true
-              :compiler {:main events-pipes.client.ui
+              :compiler {:main events-pipes.client.main
                          :asset-path "js/compiled/out"
                          :output-to "resources/public/js/compiled/events_pipes.js"
                          :output-dir "resources/public/js/compiled/out"
